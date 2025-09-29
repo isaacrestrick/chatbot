@@ -1,7 +1,6 @@
 import type { Route } from "./+types/home";
 import { redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router'
 import SignOut from '../ui_components/signout'
-
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "New React Router App" },
@@ -21,7 +20,12 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 export async function action({ request }: ActionFunctionArgs) {
   const { auth } = await import("../lib/auth.server");
-  return auth.handler(request)
+  const session = await auth.api.getSession({ headers: request.headers })
+  if (session?.user) {
+    return auth.handler(request)
+  } else {
+    throw redirect("/signin")
+  }
 }
 
 export default function Home({ loaderData }: Route.ComponentProps) {
