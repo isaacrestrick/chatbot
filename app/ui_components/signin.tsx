@@ -1,11 +1,11 @@
-import { Form } from "react-router"
+import { Form, redirect, useNavigate } from "react-router"
 import { useState } from "react"
 import { authClient } from "../lib/auth-client"
 
 export default function SignIn() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-
+  const navigate = useNavigate()
   const signIn = async () => {
     await authClient.signIn.email(
       {
@@ -20,6 +20,7 @@ export default function SignIn() {
         onSuccess: (ctx) => {
           console.log("hi")
           // redirect to home
+          navigate("/")
         },
         onError: (ctx) => {
           console.log("hey")

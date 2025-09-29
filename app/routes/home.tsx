@@ -1,9 +1,6 @@
 import type { Route } from "./+types/home";
-import SignIn from '../ui_components/signin'
-import SignUp from '../ui_components/signup'
+import { redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router'
 import SignOut from '../ui_components/signout'
-import { authClient } from '../lib/auth-client'
-
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "New React Router App" },
@@ -11,14 +8,26 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
-export default function Home() {
-  const { data, isPending, error } = authClient.useSession()
-  if (data) {
-    return <div><h1>Hello, {data.user.email}!</h1><SignOut/></div>
+export async function loader({ request }: LoaderFunctionArgs) {
+  const { auth } = await import("../lib/auth.server");
+  const session = await auth.api.getSession({ headers: request.headers })
+  if (session?.user) {
+    return { user: session.user }
   } else {
-    return <div>
-      <SignIn />
-      <SignUp />
-    </div>
+    throw redirect("/signin")
   }
+}
+
+export async function action({ request }: ActionFunctionArgs) {
+  const { auth } = await import("../lib/auth.server");
+  const session = await auth.api.getSession({ headers: request.headers })
+  if (session?.user) {
+    return auth.handler(request)
+  } else {
+    throw redirect("/signin")
+  }
+}
+
+export default function Home({ loaderData }: Route.ComponentProps) {
+    return <div><h1>Hello, {loaderData.user.email}!</h1><SignOut/></div>
  }
