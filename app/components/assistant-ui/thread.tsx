@@ -87,7 +87,7 @@ const ThreadWelcome: FC = () => {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 10 }}
-              className="aui-thread-welcome-message-motion-1 text-2xl font-semibold mt-5 text-center"
+              className="aui-thread-welcome-message-motion-1 text-2xl font-semibold absolute top-20 left-1/2 -translate-x-1/2 text-center"
             >
               Welcome to the Chatbot
             </m.div>
