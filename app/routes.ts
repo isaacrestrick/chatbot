@@ -7,6 +7,6 @@ export default [
     route("chat", "routes/chat.tsx"),
     route("ai", "routes/ai.ts"),
     route("login", "routes/login.tsx"),
-    route("signup", "routes/signup.tsx"),
+    route("signup", "routes/signup.tsx")
 
 ] satisfies RouteConfig;
