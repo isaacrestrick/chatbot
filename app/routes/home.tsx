@@ -1,6 +1,6 @@
 import type { Route } from "./+types/home";
 import { redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router'
-import SignOut from '../ui_components/signout'
+import SignOut from '../ui_components/SignOut'
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "New React Router App" },

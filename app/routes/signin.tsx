@@ -1,7 +1,7 @@
 import type { Route } from "./+types/home";
-import SignIn from '../ui_components/signin'
-import SignUp from '../ui_components/signup'
-import SignInGoogle from "../ui_components/signinGoogle";
+import SignIn from '../ui_components/SignIn'
+import SignUp from '../ui_components/SignUp'
+import SignInGoogle from "../ui_components/SignInGoogle";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -10,7 +10,7 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
-export default function Home() {
+export default function SignInPage() {
     return <div>
       <SignIn />
       <SignInGoogle />
