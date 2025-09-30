@@ -1,29 +1,29 @@
-import { Form, redirect, useNavigate } from "react-router"
+import { Form, useNavigate } from "react-router"
 import { useState } from "react"
 import { authClient } from "../lib/auth-client"
 
-export default function SignIn() {
+export default function SignUpForm() {
   const [email, setEmail] = useState("")
+  const [name, setName] = useState("")
   const [password, setPassword] = useState("")
   const navigate = useNavigate()
-  const signIn = async () => {
-    await authClient.signIn.email(
+
+  const signUp = async () => {
+    await authClient.signUp.email(
       {
         email,
         password,
+        name,
       },
       {
         onRequest: (ctx) => {
           // show loading state
-          console.log("hello")
         },
         onSuccess: (ctx) => {
-          console.log("hi")
           // redirect to home
           navigate("/")
         },
         onError: (ctx) => {
-          console.log("hey")
           alert(ctx.error)
         },
       },
@@ -31,27 +31,35 @@ export default function SignIn() {
   }
 
   return (
-    <div className="border border-white mb-4">
+    <div className="border border-white">
       <h2>
-        Sign In
+        Sign Up
       </h2>
-      <Form onSubmit={signIn}>
+      <Form
+        onSubmit={signUp}
+      >
+        <input
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Name"
+        />
         <input
           type="email"
           value={email}
-          placeholder="Email"
           onChange={(e) => setEmail(e.target.value)}
+          placeholder="Email"
         />
         <input
           type="password"
           value={password}
-          placeholder="Password"
           onChange={(e) => setPassword(e.target.value)}
+          placeholder="Password"
         />
         <button
           type="submit"
         >
-          Sign In
+          Sign Up
         </button>
       </Form>
     </div>

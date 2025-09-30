@@ -1,29 +1,29 @@
-import { Form, useNavigate } from "react-router"
+import { Form, redirect, useNavigate } from "react-router"
 import { useState } from "react"
 import { authClient } from "../lib/auth-client"
 
-export default function SignUp() {
+export default function SignInForm() {
   const [email, setEmail] = useState("")
-  const [name, setName] = useState("")
   const [password, setPassword] = useState("")
   const navigate = useNavigate()
-
-  const signUp = async () => {
-    await authClient.signUp.email(
+  const signIn = async () => {
+    await authClient.signIn.email(
       {
         email,
         password,
-        name,
       },
       {
         onRequest: (ctx) => {
           // show loading state
+          console.log("hello")
         },
         onSuccess: (ctx) => {
+          console.log("hi")
           // redirect to home
           navigate("/")
         },
         onError: (ctx) => {
+          console.log("hey")
           alert(ctx.error)
         },
       },
@@ -31,35 +31,27 @@ export default function SignUp() {
   }
 
   return (
-    <div className="border border-white">
+    <div className="border border-white mb-4">
       <h2>
-        Sign Up
+        Sign In
       </h2>
-      <Form
-        onSubmit={signUp}
-      >
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Name"
-        />
+      <Form onSubmit={signIn}>
         <input
           type="email"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
           placeholder="Email"
+          onChange={(e) => setEmail(e.target.value)}
         />
         <input
           type="password"
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
           placeholder="Password"
+          onChange={(e) => setPassword(e.target.value)}
         />
         <button
           type="submit"
         >
-          Sign Up
+          Sign In
         </button>
       </Form>
     </div>

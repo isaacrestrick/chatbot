@@ -2,7 +2,7 @@ import { Form, redirect, useNavigate } from "react-router"
 import { useState } from "react"
 import { authClient } from "../lib/auth-client"
 
-export default function SignInGoogle() {
+export default function SignInGoogleButton() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const navigate = useNavigate()
