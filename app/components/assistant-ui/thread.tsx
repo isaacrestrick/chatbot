@@ -55,9 +55,9 @@ export const Thread: FC = () => {
             <ThreadPrimitive.If empty={false}>
               <div className="aui-thread-viewport-spacer min-h-34 grow" />
             </ThreadPrimitive.If>
+            <Composer />
           </ThreadPrimitive.Viewport>
         </ThreadPrimitive.Root>
-            <Composer />
       </MotionConfig>
     </LazyMotion>
   );
@@ -167,7 +167,7 @@ const ThreadWelcomeSuggestions: FC = () => {
 
 const Composer: FC = () => {
   return (
-    <div className="aui-composer-wrapper fixed left-1/2 -translate-x-1/2 mt-20 bottom-0 mx-auto flex w-[44rem] max-w-[var(--thread-max-width)] flex-col gap-4 overflow-visible rounded-t-3xl bg-background pb-4 md:pb-4">
+    <div className="aui-composer-wrapper fixed left-1/2 -translate-x-1/2 mt-20 bottom-0 mx-auto flex w-full max-w-[var(--thread-max-width)] flex-col gap-4 overflow-visible rounded-t-3xl bg-background pb-4 md:pb-4">
       <ThreadScrollToBottom />
       <ThreadPrimitive.Empty>
         <ThreadWelcomeSuggestions />
