@@ -100,6 +100,7 @@ const ThreadWelcome: FC = () => {
             >
               How can I help you today?
             </m.div>*/}
+            
           </div>
         </div>
       </div>
