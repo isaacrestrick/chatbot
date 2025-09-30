@@ -1,10 +1,11 @@
 import type { Route } from "./+types/home";
 import { redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router'
-import SignOut from '../ui_components/SignOutButton'
+import SignOutButton from '../ui_components/SignOutButton'
+import ChatButton from '../ui_components/ChatButton'
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "New React Router App" },
-    { name: "description", content: "Welcome to React Router!" },
+    { title: "User Home. Will probably list out chats and include a new chat button later" },
+    { name: "description", content: "Welcome to chatbot!" },
   ];
 }
 
@@ -29,5 +30,5 @@ export async function action({ request }: ActionFunctionArgs) {
 }
 
 export default function Home({ loaderData }: Route.ComponentProps) {
-    return <div><h1>Hello, {loaderData.user.email}!</h1><SignOut/></div>
+    return <div><h1>Hello, {loaderData.user.email}!</h1><ChatButton /> <SignOutButton /></div>
  }

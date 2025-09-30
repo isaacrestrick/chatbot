@@ -1,7 +1,7 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { db } from "./db";
-import { user, session, account, verification } from "./auth-schema"
+import { db } from "./db.server.ts";
+import { user, session, account, verification } from "./auth-schema.server"
 
 export const auth = betterAuth({
     socialProviders: {

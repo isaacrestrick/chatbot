@@ -10,8 +10,6 @@ export default function SignOutButton() {
   }
 
   return (
-    <div onClick={signOut}>
-      <h2>Sign out</h2>
-    </div>
+    <button type="button" onClick={signOut} className="border border-white rounded-[4px] p-1"><h2>Sign Out</h2></button>
   )
 }
