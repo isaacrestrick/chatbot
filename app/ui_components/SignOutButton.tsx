@@ -1,7 +1,7 @@
 import { authClient } from "../lib/auth-client"
 import { useNavigate } from "react-router"
 
-export default function SignOut() {
+export default function SignOutButton() {
   const navigate = useNavigate()
 
   const signOut = async () => {

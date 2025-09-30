@@ -1,7 +1,7 @@
 import type { Route } from "./+types/home";
-import SignIn from '../ui_components/SignIn'
-import SignUp from '../ui_components/SignUp'
-import SignInGoogle from "../ui_components/SignInGoogle";
+import SignInForm from '../ui_components/SignInForm'
+import SignUpForm from '../ui_components/SignUpForm'
+import SignInGoogleButton from "../ui_components/SignInGoogleButton";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -12,8 +12,8 @@ export function meta({}: Route.MetaArgs) {
 
 export default function SignInPage() {
     return <div>
-      <SignIn />
-      <SignInGoogle />
-      <SignUp />
+      <SignInForm />
+      <SignInGoogleButton />
+      <SignUpForm />
     </div>
  }
