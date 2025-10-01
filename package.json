@@ -9,8 +9,10 @@
     "typecheck": "react-router typegen && tsc"
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "^2.0.22",
     "@ai-sdk/openai": "^2.0.42",
     "@ai-sdk/react": "^2.0.59",
+    "@anthropic-ai/sdk": "^0.65.0",
     "@assistant-ui/react": "^0.11.22",
     "@assistant-ui/react-ai-sdk": "^1.1.4",
     "@assistant-ui/react-markdown": "^0.11.0",

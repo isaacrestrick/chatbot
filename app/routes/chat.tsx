@@ -5,7 +5,7 @@ import { DefaultChatTransport } from 'ai';
 import { useState } from 'react';
 import type { Route } from "./+types/home";
 import { redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router'
-import { useChatRuntime } from "@assistant-ui/react-ai-sdk";
+import { useAISDKRuntime } from "@assistant-ui/react-ai-sdk";
 import { AssistantRuntimeProvider } from "@assistant-ui/react";
 
 
@@ -38,16 +38,12 @@ export function meta({}: Route.MetaArgs) {
 
 export default function Chat() {
   const [input, setInput] = useState('');
-  const { messages, sendMessage } = useChat({
+  const chat = useChat({
     transport: new DefaultChatTransport({
       api: '/ai'
     })
   });
-  const runtime = useChatRuntime({
-    transport: new DefaultChatTransport({
-      api: '/ai'
-    })
-  });
+  const runtime = useAISDKRuntime(chat);
   if (true) {
     return <div className="h-full">
     <AssistantRuntimeProvider runtime={runtime}>
@@ -57,42 +53,4 @@ export default function Chat() {
     </AssistantRuntimeProvider>
   </div>
   }
-  return (
-    <div className="flex flex-col w-full max-w-md py-24 mx-auto stretch">
-      {messages.map(message => (
-        <div key={message.id} className="whitespace-pre-wrap">
-          {message.role === 'user' ? 'User: ' : 'AI: '}
-          {message.parts.map((part, i) => {
-            switch (part.type) {
-              case 'text':
-                return <div key={`${message.id}-${i}`}>{part.text}</div>;
-              case 'tool-weather':
-                return (
-                  <pre key={`${message.id}-${i}`}>
-                    {JSON.stringify(part, null, 2)}
-                  </pre>
-                );
-            }
-          })}
-        </div>
-      ))}
-      <form
-        onSubmit={e => {
-          e.preventDefault();
-          sendMessage({ text: input });
-          setInput('');
-        }}
-      >
-      <div className="fixed">
-        <input
-          className="fixed dark:bg-zinc-900 bottom-0 w-50 max-w-md p-2 mb-8 border border-zinc-300 dark:border-zinc-800 rounded shadow-xl"
-          value={input}
-          placeholder="Say something..."
-          onChange={e => setInput(e.currentTarget.value)}
-        />
-        <BackButton />
-      </div>
-      </form>
-    </div>
-  );
 }
