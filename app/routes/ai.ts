@@ -6,7 +6,7 @@ import { streamText, convertToModelMessages, tool, stepCountIs, dynamicTool, jso
 import { z } from 'zod';
 import { betaMemoryTool, type MemoryToolHandlers } from '@anthropic-ai/sdk/helpers/beta/memory';
 
-import { LocalFilesystemMemoryTool } from '../lib/tool_helpers_memory'
+import { LocalFilesystemMemoryTool } from '~/lib/tool_helpers_memory.server'
 import type {BetaMemoryTool20250818Command} from '@anthropic-ai/sdk/resources/beta';
 
 
