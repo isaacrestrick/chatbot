@@ -121,7 +121,14 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 
 export async function action({ request }: ActionFunctionArgs) {
-    const { messages }: { messages: UIMessage[] } = await request.json();  
+    //console.log("request: ", request, request.id!)
+    //const { messages }: { messages: UIMessage[] } = await request.json();  
+    const { messages, id }: { messages: UIMessage[]; chatId: string } = await request.json();
+    console.log("chatidheehee", id)
+
+    // LOAD IT IN
+    
+
 
     const webSearchTool = anthropic.tools.webSearch_20250305({
       maxUses: 20,
@@ -149,6 +156,8 @@ ASSUME INTERRUPTION: Your context window might be reset at any moment, so you ri
           ` },
           ...convertToModelMessages(messages)],
     });
+
+  // SAVE IT
 
     return result.toUIMessageStreamResponse();
 }

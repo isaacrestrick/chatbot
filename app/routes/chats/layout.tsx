@@ -10,10 +10,14 @@ import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport } from 'ai';
 import { useAISDKRuntime } from "@assistant-ui/react-ai-sdk";
 import { AssistantRuntimeProvider } from "@assistant-ui/react";
+import { useParams } from "react-router";
 
 
 export default function ChatLayout() {
-const chat = useChat({
+  const {id} = useParams()
+  console.log("IIIIDD", id)
+  const chat = useChat({
+    id: id,
     transport: new DefaultChatTransport({
         api: '/ai'
     })
