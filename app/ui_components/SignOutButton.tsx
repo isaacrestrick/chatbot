@@ -1,6 +1,6 @@
 import { authClient } from "../lib/auth-client"
 import { useNavigate } from "react-router"
-
+import { Button } from "~/components/ui/button"
 export default function SignOutButton() {
   const navigate = useNavigate()
 
@@ -10,6 +10,6 @@ export default function SignOutButton() {
   }
 
   return (
-    <button type="button" onClick={signOut} className="border border-white rounded-[4px] p-1"><h2>Sign Out</h2></button>
+    <Button type="button" onClick={signOut} className="mx-5">Sign Out</Button>
   )
 }

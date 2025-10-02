@@ -1,6 +1,5 @@
 import { forwardRef } from "react";
-import type { ComponentPropsWithRef } from "react";
-
+import type {ComponentPropsWithRef} from "react";
 import { Slottable } from "@radix-ui/react-slot";
 
 import {
