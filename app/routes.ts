@@ -5,7 +5,6 @@ export default [
         index("routes/chats/home.tsx"), 
         route("chat", "routes/chats/chat.tsx")
     ]),
-    route("signin", "routes/signin.tsx"),
     route("api/auth/*", "routes/api.auth.$.ts"),
     route("ai", "routes/ai.ts"),
     route("login", "routes/login.tsx"),

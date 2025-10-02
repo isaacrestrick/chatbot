@@ -9,29 +9,72 @@ import {
 } from "~/components/ui/card"
 import { Input } from "~/components/ui/input"
 import { Label } from "~/components/ui/label"
+import { Form, useNavigate } from "react-router"
+import { authClient } from "~/lib/auth-client"
+
+
 
 export function SignupForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const navigate = useNavigate()
+
+  const signUp = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+    const name = formData.get("name") as string;
+
+    await authClient.signUp.email(
+      {
+        email,
+        password,
+        name,
+      },
+      {
+        onRequest: (ctx) => {
+          // show loading state
+        },
+        onSuccess: (ctx) => {
+          // redirect to home
+          navigate("/")
+        },
+        onError: (ctx) => {
+          alert(ctx.error)
+        },
+      },
+    )
+  }
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
         <CardHeader>
           <CardTitle>Sign Up</CardTitle>
           <CardDescription>
-            Enter your email below to sign up for an account
+            Enter your name, email below to sign up for an account
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form>
+          <form onSubmit={signUp}>
             <div className="flex flex-col gap-6">
+            <div className="grid gap-3">
+                <Label htmlFor="name">Name</Label>
+                <Input
+                  id="name"
+                  type="name"
+                  name="name"
+                  placeholder="Joseph Mama"
+                />
+              </div>
               <div className="grid gap-3">
                 <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="m@example.com"
+                  name="email"
+                  placeholder="joseph@mama.com"
                   required
                 />
               </div>
@@ -45,12 +88,16 @@ export function SignupForm({
                     Forgot your password?
                   </a>*/}
                 </div>
-                <Input id="password" type="password" required />
+                <Input id="password" type="password" name="password" required />
               </div>
               <div className="flex flex-col gap-3">
                 <Button type="submit" className="w-full">
                   Sign Up
                 </Button>
+                <Button variant="outline" onClick={() => navigate("/login")} className="w-full">
+                  Back to login
+                </Button>
+                
               </div>
             </div>
             {<div className="mt-4 text-center text-sm">

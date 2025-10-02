@@ -18,7 +18,7 @@ export function meta({}: Route.MetaArgs) {
     if (session?.user) {
       return { user: session.user }
     } else {
-      throw redirect("/signin")
+      throw redirect("/login")
     }
   }
   
@@ -28,7 +28,7 @@ export function meta({}: Route.MetaArgs) {
     if (session?.user) {
       return auth.handler(request)
     } else {
-      throw redirect("/signin")
+      throw redirect("/login")
     }
   }
 

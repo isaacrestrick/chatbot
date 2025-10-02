@@ -6,7 +6,7 @@ export default function SignOutButton() {
 
   const signOut = async () => {
     await authClient.signOut()
-    navigate("/signin")
+    navigate("/login")
   }
 
   return (

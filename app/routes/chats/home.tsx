@@ -15,7 +15,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   if (session?.user) {
     return { user: session.user }
   } else {
-    throw redirect("/signin")
+    throw redirect("/login")
   }
 }
 
@@ -25,10 +25,10 @@ export async function action({ request }: ActionFunctionArgs) {
   if (session?.user) {
     return auth.handler(request)
   } else {
-    throw redirect("/signin")
+    throw redirect("/login")
   }
 }
 
 export default function Home({ loaderData }: Route.ComponentProps) {
-    return <div className="flex justify-center items-center min-h-screen"><div className="flex flex-col justify-center items-center text-3xl"><h1>Hello, {loaderData.user.email}!</h1><div className="mt-5"><ChatButton /> <SignOutButton /></div></div></div>
+    return <div className="flex justify-center items-center min-h-screen"><div className="flex flex-col justify-center items-center text-3xl"><h1>Hello, {loaderData.user.name ? loaderData.user.name : loaderData.user.email}!</h1><div className="mt-5"><ChatButton /> <SignOutButton /></div></div></div>
  }
