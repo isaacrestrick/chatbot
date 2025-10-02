@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router"
-
+import { Button } from "~/components/ui/button"
 export default function BackButton() {
   const navigate = useNavigate()
 
@@ -8,6 +8,6 @@ export default function BackButton() {
   }
 
   return (
-    <button type="button" onClick={goChat} className="border border-white rounded-[4px] p-1"><h2>Chat</h2></button>
+    <Button type="button" onClick={goChat} className="mx-5">Chat</Button>
   )
 }

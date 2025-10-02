@@ -1,7 +1,7 @@
 import type { Route } from "./+types/home";
 import { redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router'
-import SignOutButton from '../ui_components/SignOutButton'
-import ChatButton from '../ui_components/ChatButton'
+import SignOutButton from '../../ui_components/SignOutButton'
+import ChatButton from '../../ui_components/ChatButton'
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "User Home. Will probably list out chats and include a new chat button later" },
@@ -10,7 +10,7 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  const { auth } = await import("../lib/auth.server");
+  const { auth } = await import("../../lib/auth.server");
   const session = await auth.api.getSession({ headers: request.headers })
   if (session?.user) {
     return { user: session.user }
@@ -20,7 +20,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 
 export async function action({ request }: ActionFunctionArgs) {
-  const { auth } = await import("../lib/auth.server");
+  const { auth } = await import("../../lib/auth.server");
   const session = await auth.api.getSession({ headers: request.headers })
   if (session?.user) {
     return auth.handler(request)
@@ -30,5 +30,5 @@ export async function action({ request }: ActionFunctionArgs) {
 }
 
 export default function Home({ loaderData }: Route.ComponentProps) {
-    return <div><h1>Hello, {loaderData.user.email}!</h1><ChatButton /> <SignOutButton /></div>
+    return <div className="flex justify-center items-center min-h-screen"><div className="flex flex-col justify-center items-center text-3xl"><h1>Hello, {loaderData.user.email}!</h1><div className="mt-5"><ChatButton /> <SignOutButton /></div></div></div>
  }
