@@ -4,7 +4,10 @@
 *.env.*
 # End of Selection
 /node_modules/
+.cursor
 
 # React Router
 /.react-router/
 /build/
+
+plan.md

@@ -45,7 +45,6 @@ const SidebarContext = React.createContext<SidebarContextProps | null>(null)
 
 function useSidebar() {
   const context = React.useContext(SidebarContext)
-  console.log("context: ", context)
   if (!context) {
     throw new Error("useSidebar must be used within a SidebarProvider.")
   }
@@ -269,7 +268,6 @@ function SidebarTrigger({
       className={cn("size-7", className)}
       onClick={(event) => {
         onClick?.(event)
-        console.log("clicked")
         toggleSidebar()
       }}
       {...props}

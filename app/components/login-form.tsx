@@ -23,7 +23,7 @@ export function LoginForm({
     const formData = new FormData(e.currentTarget);
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
-    console.log("stuff: ", email, password)
+
     await authClient.signIn.email(
       {
         email,
@@ -32,15 +32,15 @@ export function LoginForm({
       {
         onRequest: (ctx) => {
           // show loading state
-          console.log("hello")
+
         },
         onSuccess: (ctx) => {
-          console.log("hi")
+
           // redirect to home
           navigate("/")
         },
         onError: (ctx) => {
-          console.log("hey")
+
           alert(ctx.error)
         },
       },
@@ -53,15 +53,15 @@ export function LoginForm({
       {
         onRequest: (ctx) => {
           // show loading state
-          console.log("hello")
+
         },
         onSuccess: (ctx) => {
-          console.log("hi")
+
           // redirect to home
           navigate("/")
         },
         onError: (ctx) => {
-          console.log("hey")
+
           alert(ctx.error)
         },
       },
