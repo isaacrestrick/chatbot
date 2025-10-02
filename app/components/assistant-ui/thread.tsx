@@ -55,8 +55,8 @@ export const Thread: FC = () => {
             <ThreadPrimitive.If empty={false}>
               <div className="aui-thread-viewport-spacer min-h-34 grow" />
             </ThreadPrimitive.If>
-            <Composer />
           </ThreadPrimitive.Viewport>
+            <Composer />
         </ThreadPrimitive.Root>
       </MotionConfig>
     </LazyMotion>
