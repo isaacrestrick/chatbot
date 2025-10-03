@@ -15,7 +15,7 @@ import { useParams } from "react-router";
 
 export default function ChatLayout() {
   const {id} = useParams()
-  console.log("IIIIDD", id)
+  //console.log("IIIIDD", id)
   const chat = useChat({
     id: id,
     transport: new DefaultChatTransport({
