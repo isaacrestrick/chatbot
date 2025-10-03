@@ -88,11 +88,21 @@ export function meta({}: Route.MetaArgs) {
     }
   }
 
+  export function clientLoader({ serverLoader }: any) {
+    return serverLoader()
+  }
+  
+  
+  clientLoader.hydrate = true
+  
+
 export default function Chat() {
   const { id } = useParams();
   const submit = useSubmit();
   const { chatContent } = useLoaderData()
-  console.log(id, chatContent)
+  //console.log(id, chatContent)
+
+  // chat content is list of ui messages
 
   /*const handleSubmit = () => {
     const 
@@ -107,3 +117,4 @@ export default function Chat() {
   </div>
   }
 }
+

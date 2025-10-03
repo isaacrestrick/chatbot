@@ -4,25 +4,28 @@ import {
   ThreadListPrimitive,
 } from "@assistant-ui/react";
 import { ArchiveIcon, PlusIcon } from "lucide-react";
-
+import { useNavigate } from "react-router"
 import { Button } from "~/components/ui/button";
 import { TooltipIconButton } from "~/components/assistant-ui/tooltip-icon-button";
 
-export const ThreadList: FC = () => {
+export const ThreadList: FC = (props) => {
+  //console.log("down to threadlist", props.chats)
   return (
     <ThreadListPrimitive.Root className="aui-root aui-thread-list-root flex flex-col items-stretch gap-1.5">
       <ThreadListNew />
-      <ThreadListItems />
+      <ThreadListItems chats={props.chats}/>
     </ThreadListPrimitive.Root>
   );
 };
 
 const ThreadListNew: FC = () => {
+  const navigate = useNavigate()
   return (
     <ThreadListPrimitive.New asChild>
       <Button
         className="aui-thread-list-new flex items-center justify-start gap-1 rounded-lg px-2.5 py-2 text-start hover:bg-muted data-active:bg-muted"
         variant="ghost"
+        onClick = {() => {navigate(`/chat/` + crypto.randomUUID())}}
       >
         <PlusIcon />
         New Thread
@@ -31,8 +34,9 @@ const ThreadListNew: FC = () => {
   );
 };
 
-const ThreadListItems: FC = () => {
-  return <ThreadListPrimitive.Items components={{ ThreadListItem }} />;
+const ThreadListItems: FC = (props) => {
+  console.log("down to threadlist items", props.chats)
+  return <ThreadListPrimitive.Items components={{ ThreadListItem }} chats={props.chats}/>;
 };
 
 const ThreadListItem: FC = () => {

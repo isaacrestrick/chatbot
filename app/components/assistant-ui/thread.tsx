@@ -17,7 +17,13 @@ import {
   RefreshCwIcon,
   Square,
 } from "lucide-react";
-import type { FC } from "react";
+import {
+  forwardRef,
+  useEffect,
+  useState,
+  type ComponentPropsWithoutRef,
+  type FC,
+} from "react";
 
 import {
   ComposerAddAttachment,
@@ -236,10 +242,33 @@ const MessageError: FC = () => {
   );
 };
 
+const HoverSafeMessageContainer = forwardRef<
+  HTMLDivElement,
+  ComponentPropsWithoutRef<"div">
+>(({ className, ...props }, ref) => {
+  const [canHover, setCanHover] = useState(false);
+
+  useEffect(() => {
+    // Delay hover activation so tap-state doesn't see updates before mount.
+    const id = requestAnimationFrame(() => setCanHover(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
+
+  return (
+    <div
+      ref={ref}
+      className={cn(className, !canHover && "pointer-events-none")}
+      {...props}
+    />
+  );
+});
+
+HoverSafeMessageContainer.displayName = "HoverSafeMessageContainer";
+
 const AssistantMessage: FC = () => {
   return (
     <MessagePrimitive.Root asChild>
-      <div
+      <HoverSafeMessageContainer
         className="aui-assistant-message-root relative mx-auto w-full max-w-[var(--thread-max-width)] animate-in py-4 duration-200 fade-in slide-in-from-bottom-1 last:mb-24"
         data-role="assistant"
       >
@@ -257,7 +286,7 @@ const AssistantMessage: FC = () => {
           <BranchPicker />
           <AssistantActionBar />
         </div>
-      </div>
+      </HoverSafeMessageContainer>
     </MessagePrimitive.Root>
   );
 };
@@ -292,7 +321,7 @@ const AssistantActionBar: FC = () => {
 const UserMessage: FC = () => {
   return (
     <MessagePrimitive.Root asChild>
-      <div
+      <HoverSafeMessageContainer
         className="aui-user-message-root mx-auto grid w-full max-w-[var(--thread-max-width)] animate-in auto-rows-auto grid-cols-[minmax(72px,1fr)_auto] gap-y-2 px-2 py-4 duration-200 fade-in slide-in-from-bottom-1 first:mt-3 last:mb-5 [&:where(>*)]:col-start-2"
         data-role="user"
       >
@@ -308,7 +337,7 @@ const UserMessage: FC = () => {
         </div>
 
         <BranchPicker className="aui-user-branch-picker col-span-full col-start-1 row-start-3 -mr-1 justify-end" />
-      </div>
+      </HoverSafeMessageContainer>
     </MessagePrimitive.Root>
   );
 };
