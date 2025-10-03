@@ -1,8 +1,9 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { db } from "./db.server.ts";
-import { user, session, account, verification } from "./auth-schema.server"
+import { db } from "./db.server";
+import { user, session, account, verification } from "./schemas/auth-schema.server.js"
 
+// A request handler
 export const auth = betterAuth({
     socialProviders: {
         google: { 

@@ -1,28 +1,42 @@
-import type { FC } from "react";
+import { type FC, useState, useEffect } from "react";
 import {
   ThreadListItemPrimitive,
   ThreadListPrimitive,
 } from "@assistant-ui/react";
 import { ArchiveIcon, PlusIcon } from "lucide-react";
-
+import { useNavigate, useFetcher } from "react-router"
 import { Button } from "~/components/ui/button";
 import { TooltipIconButton } from "~/components/assistant-ui/tooltip-icon-button";
 
-export const ThreadList: FC = () => {
+export const ThreadList: FC = (props) => {
+  //console.log("down to threadlist", props.chats)
+  //console.log("revalidator", props.revalidator)
+  const [chats, setChats] = useState(props.chats)
   return (
     <ThreadListPrimitive.Root className="aui-root aui-thread-list-root flex flex-col items-stretch gap-1.5">
-      <ThreadListNew />
-      <ThreadListItems />
+      <ThreadListNew revalidator={props.revalidator} optimisticUpdate={setChats}/>
+      {/*<ThreadListItems chats={props.chats}/>*/}
+      {chats.map(chat => <ThreadListItem chat={chat} key={chat.chatId} revalidator={props.revalidator} optimisticUpdate={setChats}/>)}
     </ThreadListPrimitive.Root>
   );
 };
 
-const ThreadListNew: FC = () => {
+const ThreadListNew: FC = (props) => {
+  const navigate = useNavigate()
+  //console.log("I also ahve the revalidator", props.revalidator)
   return (
     <ThreadListPrimitive.New asChild>
       <Button
         className="aui-thread-list-new flex items-center justify-start gap-1 rounded-lg px-2.5 py-2 text-start hover:bg-muted data-active:bg-muted"
         variant="ghost"
+        onClick = {() => {
+          const newId = crypto.randomUUID()
+          navigate(`/chat/` + newId)
+          const huh = props.revalidator.revalidate()
+          props.optimisticUpdate(prev => [{title: "Chat: " + newId, chatId: newId}, ...prev])
+          console.log("i updated")
+          console.log("i revalidated", huh)
+        }}
       >
         <PlusIcon />
         New Thread
@@ -35,32 +49,58 @@ const ThreadListItems: FC = () => {
   return <ThreadListPrimitive.Items components={{ ThreadListItem }} />;
 };
 
-const ThreadListItem: FC = () => {
+const ThreadListItem: FC = (props) => {
+  const navigate = useNavigate()
+  //console.log("i have the revalidator", props.revalidator)
   return (
     <ThreadListItemPrimitive.Root className="aui-thread-list-item flex items-center gap-2 rounded-lg transition-all hover:bg-muted focus-visible:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none data-active:bg-muted">
+      <div onClick= {() => {
+      navigate("chat/" + props.chat.chatId)
+      props.revalidator.revalidate()
+      console.log("hi im navigating in the div i made hehe")
+    }}>
       <ThreadListItemPrimitive.Trigger className="aui-thread-list-item-trigger flex-grow px-3 py-2 text-start">
-        <ThreadListItemTitle />
+        <ThreadListItemTitle title={props.chat.title} id={props.chat.chatId}/>
       </ThreadListItemPrimitive.Trigger>
-      <ThreadListItemArchive />
+      </div>
+      <ThreadListItemArchive id={props.chat.chatId} optimisticUpdate={props.optimisticUpdate}/> {/*GREEDY DELETE NEXT!*/}
     </ThreadListItemPrimitive.Root>
   );
 };
 
-const ThreadListItemTitle: FC = () => {
+const ThreadListItemTitle: FC = (props) => {
+  const navigate = useNavigate()
   return (
     <span className="aui-thread-list-item-title text-sm">
-      <ThreadListItemPrimitive.Title fallback="New Chat" />
+      {<ThreadListItemPrimitive.Title fallback={props.title} />}
     </span>
   );
 };
 
-const ThreadListItemArchive: FC = () => {
+const ThreadListItemArchive: FC = (props) => {
+  //console.log(props.id, props.optimisticUpdate)
+  const fetcher = useFetcher()
   return (
     <ThreadListItemPrimitive.Archive asChild>
       <TooltipIconButton
         className="aui-thread-list-item-archive mr-3 ml-auto size-4 p-0 text-foreground hover:text-primary"
         variant="ghost"
-        tooltip="Archive thread"
+        tooltip="Delete (not archive) thread"
+        onClick={() => {
+          console.log('HAHAHA')
+          props.optimisticUpdate(prev => prev.filter(chat => chat.id !== props.id))
+          console.log('second')
+          // const formData = new FormData();
+          // formData.append('test','data')
+          // fetcher.submit(
+          //   formData,
+          //   {
+          //     method: 'POST',
+          //     action: `/api/delete/chat/${props.id}`
+          //   }
+          // )
+          // console.log('third')
+        }}
       >
         <ArchiveIcon />
       </TooltipIconButton>

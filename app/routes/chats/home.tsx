@@ -1,6 +1,6 @@
 import type { Route } from "./+types/home";
 import { redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router'
-import SignOutButton from '../../ui_components/SignOutButton'
+import SignOutButton from '~/ui_components/SignOutButton'
 import ChatButton from '../../ui_components/ChatButton'
 export function meta({}: Route.MetaArgs) {
   return [

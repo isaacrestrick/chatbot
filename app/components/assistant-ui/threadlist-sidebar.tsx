@@ -26,6 +26,7 @@ export function ThreadListSidebar({
     <div className="flex justify-center items-center">
       {isInChat ? <BackButton /> : <h1> Welcome! </h1>}
     </div>
+    //console.log("down to thradlistsidebar", props.chats)
 
   return (
     <Sidebar {...props}>
@@ -50,7 +51,7 @@ export function ThreadListSidebar({
         </div>
       </SidebarHeader>
       <SidebarContent className="aui-sidebar-content px-2">
-        <ThreadList />
+        <ThreadList chats={props.chats} revalidator={props.revalidator}/>
       </SidebarContent>
       <SidebarRail />
       <SidebarFooter className="aui-sidebar-footer border-t">

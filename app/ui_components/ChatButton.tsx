@@ -4,7 +4,8 @@ export default function ChatButton() {
   const navigate = useNavigate()
 
   const goChat = async () => {
-    navigate("/chat")
+    const uuid = crypto.randomUUID();
+    navigate(`/chat/` + uuid)
   }
 
   return (

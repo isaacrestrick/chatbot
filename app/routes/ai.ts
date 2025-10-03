@@ -2,11 +2,12 @@ import { createOpenAI } from '@ai-sdk/openai';
 import { anthropic, createAnthropic } from '@ai-sdk/anthropic';
 import type { LoaderFunctionArgs, ActionFunctionArgs } from "react-router"
 import type { UIMessage } from 'ai';
-import { streamText, convertToModelMessages, tool, stepCountIs, dynamicTool, jsonSchema } from 'ai';
+import { createIdGenerator, streamText, convertToModelMessages, tool, stepCountIs, dynamicTool, jsonSchema } from 'ai';
 import { z } from 'zod';
 import { betaMemoryTool, type MemoryToolHandlers } from '@anthropic-ai/sdk/helpers/beta/memory';
-
-import { LocalFilesystemMemoryTool } from '../lib/tool_helpers_memory'
+import { supabase } from '~/lib/supabase-client.server'
+import { db } from '~/lib/db.server'
+import { LocalFilesystemMemoryTool } from '~/lib/tool_helpers_memory.server'
 import type {BetaMemoryTool20250818Command} from '@anthropic-ai/sdk/resources/beta';
 
 
@@ -121,7 +122,10 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 
 export async function action({ request }: ActionFunctionArgs) {
-    const { messages }: { messages: UIMessage[] } = await request.json();  
+    //console.log("request: ", request, request.id!)
+    //const { messages }: { messages: UIMessage[] } = await request.json();  
+    const { messages, id }: { messages: UIMessage[]; chatId: string } = await request.json();
+    console.log("chatidheehee", id)
 
     const webSearchTool = anthropic.tools.webSearch_20250305({
       maxUses: 20,
@@ -150,5 +154,29 @@ ASSUME INTERRUPTION: Your context window might be reset at any moment, so you ri
           ...convertToModelMessages(messages)],
     });
 
-    return result.toUIMessageStreamResponse();
+  // SAVE IT
+
+    const idGenerator = createIdGenerator({
+      prefix: 'msg',
+      size: 16,
+    })
+
+    return result.toUIMessageStreamResponse({
+      originalMessages: messages,
+      generateMessageId: idGenerator,
+      onFinish: async ({ messages }) => {
+        const messagesWithIds = messages.map(msg => ({
+          ...msg,
+          id: msg.id && msg.id !== "" ? msg.id : idGenerator()
+        }));
+        const { error } = await supabase.storage
+        .from("chats")
+        .upload(id + ".json", JSON.stringify(messages), {
+          contentType: "application/json",
+          upsert: true
+        });
+        console.log("ok")
+        // also want to trigger chat updated..
+      }
+    });
 }
