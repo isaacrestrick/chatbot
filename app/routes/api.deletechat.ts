@@ -6,9 +6,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 export async function action({ request, params }: ActionFunctionArgs) {
     console.log("running the delete loader")
-    if (true) {
-      return {}
-    }
     const { auth } = await import("../lib/auth.server");
       const { db } = await import("../lib/db.server");
       const { supabase } = await import("../lib/supabase-client.server");
@@ -21,7 +18,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
       if (!session?.user || !id) {
         return {}
       }
-      // delete the chats for the current user
+
       const { error: storageError } = await supabase.storage
       .from("chats")
       .remove([`${id}.json`]);
@@ -30,7 +27,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
           console.error("Error deleting from storage:", storageError);
       }
       
-      // Delete from database
+
       await db
           .delete(chat)
           .where(and(
@@ -38,6 +35,5 @@ export async function action({ request, params }: ActionFunctionArgs) {
               eq(chat.userId, session.user.id)
           ));
 
-      return {};
       return {};
 }
