@@ -6,6 +6,7 @@ export default [
         route("chat/:id", "routes/chats/chat.tsx", { id: "chat" })
     ], {id: "chatLayout"}),
     route("api/auth/*", "routes/api.auth.$.ts"),
+    route("api/chat/delete/:id", "routes/api.deletechat.ts"),
     route("ai", "routes/ai.ts"),
     route("login", "routes/login.tsx"),
     route("signup", "routes/signup.tsx")

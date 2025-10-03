@@ -1,4 +1,4 @@
-import { Outlet, useRouteLoaderData, useLoaderData, type LoaderFunctionArgs, redirect } from "react-router";
+import { Outlet, useRevalidator, useRouteLoaderData, useLoaderData, type LoaderFunctionArgs, redirect } from "react-router";
 import { ThreadListSidebar } from "~/components/assistant-ui/threadlist-sidebar";
 import {
   SidebarProvider, 
@@ -13,6 +13,7 @@ import { AssistantRuntimeProvider } from "@assistant-ui/react";
 import { useParams } from "react-router";
 
 export async function loader({ request }: LoaderFunctionArgs) {
+  console.log("running the layout loader")
   const { auth } = await import("../../lib/auth.server");
     const { db } = await import("../../lib/db.server");
     //const { supabase } = await import("../../lib/supabase-client.server");
@@ -24,24 +25,25 @@ export async function loader({ request }: LoaderFunctionArgs) {
     if (!session?.user) {
       throw redirect("/login")
     }
-    // turn this into drizzle:
-    // select chat_id, title from chats
-    // Using drizzle to select chat_id and title from chats for the current user
-    const chats = await db
+    // Using drizzle to select chat_id and title from chats for the current user, reversed order
+    let chats = await db
       .select({
         chatId: chat.chatId,
         title: chat.title
       })
       .from(chat)
-      .where(eq(chat.userId, session.user.id));
-    //console.log(chats)
+      .where(eq(chat.userId, session.user.id))
+      .orderBy(chat.updatedAt); // sort by updatedAt ascending (default)
+    chats = chats.reverse(); // reverse the array to get descending order
     return { chats };
 }
 
 export default function ChatLayout() {
   const {id} = useParams()
   const chatListsObj = useLoaderData()
-  const chatContentObj = id ? useRouteLoaderData("chat") : null
+  const chatContentObj = useRouteLoaderData("chat")
+  const revalidator = useRevalidator()
+  //console.log("oh revalid", revalidator)
 
   console.log("obj: ", chatContentObj)
   const chat = useChat({
@@ -61,7 +63,7 @@ export default function ChatLayout() {
       <AssistantRuntimeProvider runtime={runtime}>
       <SidebarProvider>
       <div className="flex h-dvh w-full">
-        <ThreadListSidebar chats={chatListsObj.chats}/>
+        <ThreadListSidebar chats={chatListsObj.chats} revalidator={revalidator}/>
         <SidebarInset>
           {/* Add sidebar trigger, location can be customized */}
           {<SidebarTrigger className="absolute top-4 left-4 z-50" />}

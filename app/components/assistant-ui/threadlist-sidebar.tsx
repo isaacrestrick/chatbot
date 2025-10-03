@@ -51,7 +51,7 @@ export function ThreadListSidebar({
         </div>
       </SidebarHeader>
       <SidebarContent className="aui-sidebar-content px-2">
-        <ThreadList chats={props.chats}/>
+        <ThreadList chats={props.chats} revalidator={props.revalidator}/>
       </SidebarContent>
       <SidebarRail />
       <SidebarFooter className="aui-sidebar-footer border-t">

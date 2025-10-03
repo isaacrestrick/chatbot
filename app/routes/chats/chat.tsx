@@ -22,6 +22,9 @@ export function meta({}: Route.MetaArgs) {
     const { eq } = await import("drizzle-orm");
 
     const {id} = params
+    if (!id) {
+      return null
+    }
     const session = await auth.api.getSession({ headers: request.headers })
     if (!session?.user) {
       throw redirect("/login")
