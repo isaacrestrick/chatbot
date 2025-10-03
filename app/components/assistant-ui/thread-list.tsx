@@ -4,7 +4,7 @@ import {
   ThreadListPrimitive,
 } from "@assistant-ui/react";
 import { ArchiveIcon, PlusIcon } from "lucide-react";
-import { useNavigate, useFetcher } from "react-router"
+import { useNavigate, useFetcher, useParams } from "react-router"
 import { Button } from "~/components/ui/button";
 import { TooltipIconButton } from "~/components/assistant-ui/tooltip-icon-button";
 
@@ -51,6 +51,8 @@ const ThreadListItems: FC = () => {
 
 const ThreadListItem: FC = (props) => {
   const navigate = useNavigate()
+  const fetcher = useFetcher()
+  const {id} = useParams()
   //console.log("i have the revalidator", props.revalidator)
   return (
     <ThreadListItemPrimitive.Root className="aui-thread-list-item flex items-center gap-2 rounded-lg transition-all hover:bg-muted focus-visible:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none data-active:bg-muted">
@@ -63,7 +65,25 @@ const ThreadListItem: FC = (props) => {
         <ThreadListItemTitle title={props.chat.title} id={props.chat.chatId}/>
       </ThreadListItemPrimitive.Trigger>
       </div>
-      <ThreadListItemArchive id={props.chat.chatId} optimisticUpdate={props.optimisticUpdate}/> {/*GREEDY DELETE NEXT!*/}
+      <div onClick={() => {
+          props.optimisticUpdate(prev => prev.filter(chat => chat.chatId !== props.chat.chatId))
+          const formData = new FormData();
+          formData.append('test','data')
+          fetcher.submit(
+            formData,
+            {
+              method: 'POST',
+              action: `/api/chat/delete/${props.chat.chatId}`
+            }
+          )
+          console.log(props.chat.chatId, id, props.chat.chatId === id)
+          if (props.chat.chatId === id) {
+            navigate('/')
+          }
+          console.log('third')
+        }}>
+      <ThreadListItemArchive/> {/*GREEDY DELETE NEXT!*/}
+      </div>
     </ThreadListItemPrimitive.Root>
   );
 };
@@ -86,21 +106,6 @@ const ThreadListItemArchive: FC = (props) => {
         className="aui-thread-list-item-archive mr-3 ml-auto size-4 p-0 text-foreground hover:text-primary"
         variant="ghost"
         tooltip="Delete (not archive) thread"
-        onClick={() => {
-          console.log('HAHAHA')
-          props.optimisticUpdate(prev => prev.filter(chat => chat.id !== props.id))
-          console.log('second')
-          // const formData = new FormData();
-          // formData.append('test','data')
-          // fetcher.submit(
-          //   formData,
-          //   {
-          //     method: 'POST',
-          //     action: `/api/delete/chat/${props.id}`
-          //   }
-          // )
-          // console.log('third')
-        }}
       >
         <ArchiveIcon />
       </TooltipIconButton>
