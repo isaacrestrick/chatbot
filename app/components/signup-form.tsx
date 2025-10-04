@@ -94,7 +94,7 @@ export function SignupForm({
                 <Button type="submit" className="w-full">
                   Sign Up
                 </Button>
-                <Button variant="outline" onClick={() => navigate("/login")} className="w-full">
+                <Button type="button" variant="outline" onClick={() => navigate("/login")} className="w-full">
                   Back to login
                 </Button>
                 

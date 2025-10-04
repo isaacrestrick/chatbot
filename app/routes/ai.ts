@@ -8,103 +8,9 @@ import { betaMemoryTool, type MemoryToolHandlers } from '@anthropic-ai/sdk/helpe
 import { supabase } from '~/lib/supabase-client.server'
 import { db } from '~/lib/db.server'
 import { LocalFilesystemMemoryTool } from '~/lib/tool_helpers_memory.server'
+import { SupabaseMemoryTool } from '~/lib/supabase-memory.server'
+
 import type {BetaMemoryTool20250818Command} from '@anthropic-ai/sdk/resources/beta';
-
-
-const fs = await LocalFilesystemMemoryTool.init('./spaghetti/memory');
-
-const MemoryArgs = z.discriminatedUnion("command", [
-  z.object({
-    command: z.literal("view"),
-    path: z.string().min(1),
-    view_range: z.tuple([z.number().int().min(1), z.number().int().min(1)]).optional(),
-  }),
-  z.object({
-    command: z.literal("create"),
-    path: z.string().min(1),
-    file_text: z.string().default(""),
-    overwrite: z.boolean().default(true),
-  }),
-  z.object({
-    command: z.literal("str_replace"),
-    path: z.string().min(1),
-    old_str: z.string(),
-    new_str: z.string(),
-  }),
-  z.object({
-    command: z.literal("insert"),
-    path: z.string().min(1),
-    insert_line: z.number().int().min(1),
-    insert_text: z.string(),
-  }),
-  z.object({
-    command: z.literal("delete"),
-    path: z.string().min(1),
-  }),
-  z.object({
-    command: z.literal("rename"),
-    old_path: z.string().min(1),
-    new_path: z.string().min(1),
-  }),
-]);
-
-const MemoryInput = z.object({
-  command: z.enum(['view','create','str_replace','insert','delete','rename']),
-  path: z.string().optional(),
-  view_range: z.tuple([z.number().int().min(1), z.number().int().min(1)]).optional(),
-  file_text: z.string().optional(),
-  overwrite: z.boolean().optional(),
-  old_str: z.string().optional(),
-  new_str: z.string().optional(),
-  insert_line: z.number().int().min(1).optional(),
-  insert_text: z.string().optional(),
-  old_path: z.string().optional(),
-  new_path: z.string().optional(),
-});
-
-const memory = tool({
-  description: `Memory file operations (atomic). ALWAYS send a COMPLETE JSON object in one chunk.
-
-Commands:
-- create: { "command":"create", "file_text":string, "path":string, "overwrite"?:boolean }
-- delete: { "command":"delete", "path":string }
-- insert: { "command":"insert", "path":string, "insert_line":number, "insert_text":string }
-- rename: { "command":"rename", "old_path":string, "new_path":string }
-- str_replace: { "command":"str_replace", "path":string, "old_str":string, "new_str":string }
-- view:   { "command":"view", "path":string, "view_range"?: [number, number] }
-
-Examples:
-{"command":"create","file_text":"Line A\\nLine B\\n","path":"/memories/notes.txt"}
-{"command":"view","path":"/memories","view_range":[1,30]}`,
-  inputSchema: MemoryInput,
-  execute: async (input) => {
-    const parsed = MemoryArgs.safeParse(input);
-    if (!parsed.success) {
-      return { ok: false, error: parsed.error.message };
-    }
-    const args = parsed.data;
-
-    try {
-      switch (args.command) {
-        case "view":
-          return { ok: true, result: await fs.view(args) };
-        case "create":
-          return { ok: true, result: await fs.create(args) };
-        case "str_replace":
-          return { ok: true, result: await fs.str_replace(args) };
-        case "insert":
-          return { ok: true, result: await fs.insert(args) };
-        case "delete":
-          return { ok: true, result: await fs.delete(args) };
-        case "rename":
-          return { ok: true, result: await fs.rename(args) };
-      }
-    } catch (err: any) {
-      return { ok: false, error: String(err?.message ?? err) };
-    }
-  },
-});
-
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 300;
@@ -126,6 +32,111 @@ export async function action({ request }: ActionFunctionArgs) {
     //const { messages }: { messages: UIMessage[] } = await request.json();  
     const { messages, id }: { messages: UIMessage[]; chatId: string } = await request.json();
     console.log("chatidheehee", id)
+
+    //const fs = await LocalFilesystemMemoryTool.init('./spaghetti/memory');
+    
+    const project_id = "lalalalalalalaIWillSoonBeAProjectIdThatIsTheUserId"
+
+    const supamemory = await SupabaseMemoryTool.init(project_id)
+    //console.log(supamemory.project_id, supamemory.memoryRoot)
+    //console.log(supamemory.validatePath("/memories/cheese/tacos.txt"))
+    //console.log(supamemory.view({ "command": "view", "path": "/memoriesa"}))
+    
+    const MemoryArgs = z.discriminatedUnion("command", [
+      z.object({
+        command: z.literal("view"),
+        path: z.string().min(1),
+        view_range: z.tuple([z.number().int().min(1), z.number().int().min(1)]).optional(),
+      }),
+      z.object({
+        command: z.literal("create"),
+        path: z.string().min(1),
+        file_text: z.string().default(""),
+        overwrite: z.boolean().default(true),
+      }),
+      z.object({
+        command: z.literal("str_replace"),
+        path: z.string().min(1),
+        old_str: z.string(),
+        new_str: z.string(),
+      }),
+      z.object({
+        command: z.literal("insert"),
+        path: z.string().min(1),
+        insert_line: z.number().int().min(1),
+        insert_text: z.string(),
+      }),
+      z.object({
+        command: z.literal("delete"),
+        path: z.string().min(1),
+      }),
+      z.object({
+        command: z.literal("rename"),
+        old_path: z.string().min(1),
+        new_path: z.string().min(1),
+      }),
+    ]);
+
+    const MemoryInput = z.object({
+      command: z.enum(['view','create','str_replace','insert','delete','rename']),
+      path: z.string().optional(),
+      view_range: z.tuple([z.number().int().min(1), z.number().int().min(1)]).optional(),
+      file_text: z.string().optional(),
+      overwrite: z.boolean().optional(),
+      old_str: z.string().optional(),
+      new_str: z.string().optional(),
+      insert_line: z.number().int().min(1).optional(),
+      insert_text: z.string().optional(),
+      old_path: z.string().optional(),
+      new_path: z.string().optional(),
+    });
+
+    const memory = tool({
+      description: `Memory file operations (atomic). ALWAYS send a COMPLETE JSON object in one chunk.
+
+    Commands:
+    - create: { "command":"create", "file_text":string, "path":string, "overwrite"?:boolean }
+    - delete: { "command":"delete", "path":string }
+    - insert: { "command":"insert", "path":string, "insert_line":number, "insert_text":string }
+    - rename: { "command":"rename", "old_path":string, "new_path":string }
+    - str_replace: { "command":"str_replace", "path":string, "old_str":string, "new_str":string }
+    - view:   { "command":"view", "path":string, "view_range"?: [number, number] }
+
+    Examples:
+    {"command":"create","file_text":"Line A\\nLine B\\n","path":"/memories/notes.txt"}
+    {"command":"view","path":"/memories","view_range":[1,30]}`,
+      inputSchema: MemoryInput,
+      execute: async (input) => {
+        const parsed = MemoryArgs.safeParse(input);
+        if (!parsed.success) {
+          return { ok: false, error: parsed.error.message };
+        }
+        const args = parsed.data;
+
+        try {
+          switch (args.command) {
+            case "view":
+              return { ok: true, result: await supamemory.view(args) };
+            case "create":
+              return { ok: true, result: await supamemory.create(args) };
+            case "str_replace":
+              return { ok: true, result: await supamemory.str_replace(args) };
+            case "insert":
+              return { ok: true, result: await supamemory.insert(args) };
+            case "delete":
+              return { ok: true, result: await supamemory.delete(args) };
+            case "rename":
+              return { ok: true, result: await supamemory.rename(args) };
+          }
+        } catch (err: any) {
+          return { ok: false, error: String(err?.message ?? err) };
+        }
+      },
+    });
+
+
+
+    // A whole lot of code getting the memory tool hooked up to a default project, and creating it if it does not exist:
 
     const webSearchTool = anthropic.tools.webSearch_20250305({
       maxUses: 20,
