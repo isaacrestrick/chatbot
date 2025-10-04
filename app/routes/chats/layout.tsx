@@ -11,6 +11,7 @@ import { DefaultChatTransport } from 'ai';
 import { useAISDKRuntime } from "@assistant-ui/react-ai-sdk";
 import { AssistantRuntimeProvider } from "@assistant-ui/react";
 import { useParams } from "react-router";
+import { useState } from 'react'
 
 export async function loader({ request }: LoaderFunctionArgs) {
   console.log("running the layout loader")
@@ -43,9 +44,14 @@ export default function ChatLayout() {
   const chatListsObj = useLoaderData()
   const chatContentObj = useRouteLoaderData("chat")
   const revalidator = useRevalidator()
-  //console.log("oh revalid", revalidator)
-
-  console.log("obj: ", chatContentObj)
+  
+  const [chats, setChats] = useState(chatListsObj.chats)
+  // useEffect(() => {
+  //   if (id) {
+  //     console.log("effect time")
+  //     setChats( prev => [{title: "Chat: " + id, chatId: id}, ...prev])
+  //   }
+  // }, [])
   const chat = useChat({
     id: id,
     messages: chatContentObj?.chatContent?.length > 0 
@@ -55,7 +61,9 @@ export default function ChatLayout() {
         api: '/ai'
     })
   })
-    const runtime = useAISDKRuntime(chat);
+  const runtime = useAISDKRuntime(chat);
+
+
   return (
     <div>
       <nav>{/* shared navigation */}</nav>
@@ -63,11 +71,11 @@ export default function ChatLayout() {
       <AssistantRuntimeProvider runtime={runtime}>
       <SidebarProvider>
       <div className="flex h-dvh w-full">
-        <ThreadListSidebar chats={chatListsObj.chats} revalidator={revalidator}/>
+        <ThreadListSidebar chats={chats} setChats={setChats} revalidator={revalidator}/>
         <SidebarInset>
           {/* Add sidebar trigger, location can be customized */}
           {<SidebarTrigger className="absolute top-4 left-4 z-50" />}
-          <Outlet />
+          <Outlet context={ {chats, setChats} }/>
         </SidebarInset>
       </div>
     </SidebarProvider>
