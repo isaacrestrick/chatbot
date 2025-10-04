@@ -7,10 +7,8 @@ import { z } from 'zod';
 import { betaMemoryTool, type MemoryToolHandlers } from '@anthropic-ai/sdk/helpers/beta/memory';
 import { supabase } from '~/lib/supabase-client.server'
 import { db } from '~/lib/db.server'
-import { LocalFilesystemMemoryTool } from '~/lib/tool_helpers_memory.server'
-import { SupabaseMemoryTool } from '~/lib/supabase-memory.server'
 
-import type {BetaMemoryTool20250818Command} from '@anthropic-ai/sdk/resources/beta';
+import { SupabaseMemoryTool } from '~/lib/supabase-memory.server'
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 300;
@@ -28,14 +26,24 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 
 export async function action({ request }: ActionFunctionArgs) {
+    const { chat } = await import("../lib/schemas/chat-schema.server");
+    const { eq } = await import("drizzle-orm");
+
     //console.log("request: ", request, request.id!)
     //const { messages }: { messages: UIMessage[] } = await request.json();  
     const { messages, id }: { messages: UIMessage[]; chatId: string } = await request.json();
     console.log("chatidheehee", id)
 
     //const fs = await LocalFilesystemMemoryTool.init('./spaghetti/memory');
-    
-    const project_id = "lalalalalalalaIWillSoonBeAProjectIdThatIsTheUserId"
+    const userId = (await db
+      .select({
+        userId: chat.userId,
+      })
+      .from(chat)
+      .where(eq(chat.chatId, id))
+    )[0];
+    //console.log(userId)
+    const project_id = userId.userId ?? "lalalalalalalaIWillSoonBeAProjectIdThatIsTheUserId" //userId ?? "error_memory"
 
     const supamemory = await SupabaseMemoryTool.init(project_id)
     //console.log(supamemory.project_id, supamemory.memoryRoot)
