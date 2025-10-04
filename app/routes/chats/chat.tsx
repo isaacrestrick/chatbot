@@ -1,6 +1,5 @@
 import { Thread } from '~/components/assistant-ui/thread'
 
-import { useState } from 'react';
 import { useParams, useSubmit, useLoaderData } from 'react-router';
 
 import type { Route } from "./+types/home";

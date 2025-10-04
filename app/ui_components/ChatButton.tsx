@@ -1,11 +1,12 @@
 import { useNavigate } from "react-router"
 import { Button } from "~/components/ui/button"
-export default function ChatButton() {
+export default function ChatButton(props) {
   const navigate = useNavigate()
 
   const goChat = async () => {
     const uuid = crypto.randomUUID();
     navigate(`/chat/` + uuid)
+    props.setChats( prev => [{title: "Chat: " + uuid, chatId: uuid}, ...prev])
   }
 
   return (

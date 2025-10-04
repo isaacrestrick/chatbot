@@ -11,12 +11,11 @@ import { TooltipIconButton } from "~/components/assistant-ui/tooltip-icon-button
 export const ThreadList: FC = (props) => {
   //console.log("down to threadlist", props.chats)
   //console.log("revalidator", props.revalidator)
-  const [chats, setChats] = useState(props.chats)
   return (
     <ThreadListPrimitive.Root className="aui-root aui-thread-list-root flex flex-col items-stretch gap-1.5">
-      <ThreadListNew revalidator={props.revalidator} optimisticUpdate={setChats}/>
+      <ThreadListNew revalidator={props.revalidator} optimisticUpdate={props.setChats}/>
       {/*<ThreadListItems chats={props.chats}/>*/}
-      {chats.map(chat => <ThreadListItem chat={chat} key={chat.chatId} revalidator={props.revalidator} optimisticUpdate={setChats}/>)}
+      {props.chats.map(chat => <ThreadListItem chat={chat} key={chat.chatId} revalidator={props.revalidator} optimisticUpdate={props.setChats}/>)}
     </ThreadListPrimitive.Root>
   );
 };
