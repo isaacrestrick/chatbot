@@ -52,17 +52,16 @@ export default function ChatLayout() {
   //     setChats( prev => [{title: "Chat: " + id, chatId: id}, ...prev])
   //   }
   // }, [])
-  const chat = useChat({
-    id: id,
-    messages: chatContentObj?.chatContent?.length > 0 
-    ? chatContentObj.chatContent.filter((msg: any) => msg.id && msg.id !== "")
-    : undefined,
-    transport: new DefaultChatTransport({
-        api: '/ai'
+const chat = useChat({
+  id: id,
+  messages: chatContentObj?.chatContent?.length > 0
+  ? chatContentObj.chatContent.filter((msg: { id?: string }) => msg.id && msg.id !== "")
+  : undefined,
+  transport: new DefaultChatTransport({
+      api: '/ai'
     })
   })
   const runtime = useAISDKRuntime(chat);
-
 
   return (
     <div>
