@@ -1,0 +1,5 @@
+Task: Review a file for GitHub appropriateness
+Status: Starting review
+
+User has shared what appears to be development notes/planning document
+Checking for sensitive information...

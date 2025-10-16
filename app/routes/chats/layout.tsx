@@ -1,9 +1,9 @@
 import { Outlet, useRevalidator, useRouteLoaderData, useLoaderData, type LoaderFunctionArgs, redirect } from "react-router";
 import { ThreadListSidebar } from "~/components/assistant-ui/threadlist-sidebar";
 import {
-  SidebarProvider,
+  SidebarProvider, 
   SidebarInset,
-  SidebarTrigger
+  SidebarTrigger 
 } from "~/components/ui/sidebar";
 
 import { useChat } from '@ai-sdk/react';
@@ -11,9 +11,10 @@ import { DefaultChatTransport } from 'ai';
 import { useAISDKRuntime } from "@assistant-ui/react-ai-sdk";
 import { AssistantRuntimeProvider } from "@assistant-ui/react";
 import { useParams } from "react-router";
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 
 export async function loader({ request }: LoaderFunctionArgs) {
+  console.log("running the layout loader")
   const { auth } = await import("../../lib/auth.server");
     const { db } = await import("../../lib/db.server");
     //const { supabase } = await import("../../lib/supabase-client.server");
@@ -43,19 +44,23 @@ export default function ChatLayout() {
   const chatListsObj = useLoaderData()
   const chatContentObj = useRouteLoaderData("chat")
   const revalidator = useRevalidator()
-
+  
   const [chats, setChats] = useState(chatListsObj.chats)
-
+  // useEffect(() => {
+  //   if (id) {
+  //     console.log("effect time")
+  //     setChats( prev => [{title: "Chat: " + id, chatId: id}, ...prev])
+  //   }
+  // }, [])
   const chat = useChat({
     id: id,
-    initialMessages: chatContentObj?.chatContent?.length > 0
-    ? chatContentObj.chatContent.filter((msg: { id?: string }) => msg.id && msg.id !== "")
+    messages: chatContentObj?.chatContent?.length > 0 
+    ? chatContentObj.chatContent.filter((msg: any) => msg.id && msg.id !== "")
     : undefined,
     transport: new DefaultChatTransport({
         api: '/ai'
     })
   })
-
   const runtime = useAISDKRuntime(chat);
 
 
@@ -66,7 +71,7 @@ export default function ChatLayout() {
       <AssistantRuntimeProvider runtime={runtime}>
       <SidebarProvider>
       <div className="flex h-dvh w-full">
-        <ThreadListSidebar chats={chats} onChatsChange={setChats} revalidator={revalidator}/>
+        <ThreadListSidebar chats={chats} setChats={setChats} revalidator={revalidator}/>
         <SidebarInset>
           {/* Add sidebar trigger, location can be customized */}
           {<SidebarTrigger className="absolute top-4 left-4 z-50" />}
