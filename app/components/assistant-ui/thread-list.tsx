@@ -13,9 +13,9 @@ export const ThreadList: FC = (props) => {
   //console.log("revalidator", props.revalidator)
   return (
     <ThreadListPrimitive.Root className="aui-root aui-thread-list-root flex flex-col items-stretch gap-1.5">
-      <ThreadListNew revalidator={props.revalidator} optimisticUpdate={props.setChats}/>
+      <ThreadListNew revalidator={props.revalidator} optimisticUpdate={props.onChatsChange}/>
       {/*<ThreadListItems chats={props.chats}/>*/}
-      {props.chats.map(chat => <ThreadListItem chat={chat} key={chat.chatId} revalidator={props.revalidator} optimisticUpdate={props.setChats}/>)}
+      {props.chats.map(chat => <ThreadListItem chat={chat} key={chat.chatId} revalidator={props.revalidator} optimisticUpdate={props.onChatsChange}/>)}
     </ThreadListPrimitive.Root>
   );
 };
