@@ -30,9 +30,7 @@ export async function action({ request }: ActionFunctionArgs) {
     const { eq } = await import("drizzle-orm");
 
     //console.log("request: ", request, request.id!)
-    //const { messages }: { messages: UIMessage[] } = await request.json();  
-    const { messages, id }: { messages: UIMessage[]; chatId: string } = await request.json();
-    console.log("chatidheehee", id)
+    const { messages, id }: { messages: UIMessage[]; id: string } = await request.json();
 
     //const fs = await LocalFilesystemMemoryTool.init('./spaghetti/memory');
     const userId = (await db
@@ -136,8 +134,9 @@ export async function action({ request }: ActionFunctionArgs) {
             case "rename":
               return { ok: true, result: await supamemory.rename(args) };
           }
-        } catch (err: any) {
-          return { ok: false, error: String(err?.message ?? err) };
+        } catch (err) {
+          const error = err instanceof Error ? err.message : String(err);
+          return { ok: false, error };
         }
       },
     });

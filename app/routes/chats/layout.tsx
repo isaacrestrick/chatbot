@@ -14,7 +14,6 @@ import { useParams } from "react-router";
 import { useState } from 'react'
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  console.log("running the layout loader")
   const { auth } = await import("../../lib/auth.server");
     const { db } = await import("../../lib/db.server");
     //const { supabase } = await import("../../lib/supabase-client.server");
@@ -54,8 +53,8 @@ export default function ChatLayout() {
   // }, [])
   const chat = useChat({
     id: id,
-    messages: chatContentObj?.chatContent?.length > 0 
-    ? chatContentObj.chatContent.filter((msg: any) => msg.id && msg.id !== "")
+    messages: chatContentObj?.chatContent?.length > 0
+    ? chatContentObj.chatContent.filter((msg: { id?: string }) => msg.id && msg.id !== "")
     : undefined,
     transport: new DefaultChatTransport({
         api: '/ai'

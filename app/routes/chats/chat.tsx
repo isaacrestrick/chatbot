@@ -1,9 +1,9 @@
 import { Thread } from '~/components/assistant-ui/thread'
 
-import { useParams, useSubmit, useLoaderData } from 'react-router';
+import { useParams, useLoaderData } from 'react-router';
 
 import type { Route } from "./+types/home";
-import { redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router'
+import { redirect, type LoaderFunctionArgs } from 'react-router'
 
 
 export function meta({}: Route.MetaArgs) {
@@ -81,16 +81,8 @@ export function meta({}: Route.MetaArgs) {
   return { chatContent };
   }
   
-  export async function action({ request }: ActionFunctionArgs) {
-    const { auth } = await import("../../lib/auth.server");
-    console.log("chat action has the id")
-    const session = await auth.api.getSession({ headers: request.headers })
-    if (!session?.user) {
-      throw redirect("/login")
-    }
-  }
 
-  export function clientLoader({ serverLoader }: any) {
+  export function clientLoader({ serverLoader }: { serverLoader: () => Promise<{ chatContent: any }> }) {
     return serverLoader()
   }
   
@@ -99,24 +91,12 @@ export function meta({}: Route.MetaArgs) {
   
 
 export default function Chat() {
-  const { id } = useParams();
-  const submit = useSubmit();
-  const { chatContent } = useLoaderData()
-  //console.log(id, chatContent)
-
-  // chat content is list of ui messages
-
-  /*const handleSubmit = () => {
-    const 
-  }*/
-  //
-
-  if (true) {
-    return <div className="h-full">
+  return (
+    <div className="h-full">
       <div className="h-full">
         <Thread />
       </div>
-  </div>
-  }
+    </div>
+  );
 }
 

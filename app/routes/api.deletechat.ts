@@ -5,7 +5,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 
 export async function action({ request, params }: ActionFunctionArgs) {
-    console.log("running the delete loader")
     const { auth } = await import("../lib/auth.server");
       const { db } = await import("../lib/db.server");
       const { supabase } = await import("../lib/supabase-client.server");
