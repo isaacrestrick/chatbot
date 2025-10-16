@@ -188,9 +188,12 @@ ASSUME INTERRUPTION: Your context window might be reset at any moment, so you ri
           ...msg,
           id: msg.id && msg.id !== "" ? msg.id : idGenerator()
         }));
+
+        // Don't normalize - messages from streamText are already in correct UIMessage format
+        // Normalizing can corrupt tool calls and other message structures
         const { error } = await supabase.storage
         .from("chats")
-        .upload(id + ".json", JSON.stringify(messages), {
+        .upload(id + ".json", JSON.stringify(messagesWithIds), {
           contentType: "application/json",
           upsert: true
         });

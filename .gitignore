@@ -6,6 +6,9 @@
 /node_modules/
 .cursor
 
+# Local CLAUDE settings should stay out of Git
+.claude/
+
 # React Router
 /.react-router/
 /build/
@@ -14,4 +17,3 @@ plan.md
 devlog.md
 .mcp.json
 current_issues_and_recommendations.md
-.claude/

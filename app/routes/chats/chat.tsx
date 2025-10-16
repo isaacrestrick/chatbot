@@ -1,36 +1,38 @@
-import { Thread } from '~/components/assistant-ui/thread'
+import { Thread } from "~/components/assistant-ui/thread";
 
-import { useParams, useSubmit, useLoaderData } from 'react-router';
+import { useParams, useLoaderData } from "react-router";
 
 import type { Route } from "./+types/home";
-import { redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router'
+import { redirect, type LoaderFunctionArgs } from "react-router";
+import { normalizeChatMessages } from "~/lib/normalize-chat-messages";
+import type { UIMessage } from "ai";
 
 
 export function meta({}: Route.MetaArgs) {
-    return [
-      { title: "Chat page" },
-      { name: "description", content: "This is the chat page" },
-    ];
-  }
-  
-  export async function loader({ request, params }: LoaderFunctionArgs) {
-    const { auth } = await import("../../lib/auth.server");
-    const { db } = await import("../../lib/db.server");
-    const { supabase } = await import("../../lib/supabase-client.server");
-    const { chat } = await import("../../lib/schemas/chat-schema.server");
-    const { eq } = await import("drizzle-orm");
+  return [
+    { title: "Chat page" },
+    { name: "description", content: "This is the chat page" },
+  ];
+}
 
-    const {id} = params
-    if (!id) {
-      return null
-    }
-    const session = await auth.api.getSession({ headers: request.headers })
-    if (!session?.user) {
-      throw redirect("/login")
-    }
-    console.log("user id", session.user.id)
-    console.log("session validated. loader has chat id: ", id)
-    const [chatRow] = await db
+export async function loader({ request, params }: LoaderFunctionArgs) {
+  const { auth } = await import("../../lib/auth.server");
+  const { db } = await import("../../lib/db.server");
+  const { supabase } = await import("../../lib/supabase-client.server");
+  const { chat } = await import("../../lib/schemas/chat-schema.server");
+  const { eq } = await import("drizzle-orm");
+
+  const { id } = params;
+  if (!id) {
+    return null;
+  }
+  const session = await auth.api.getSession({ headers: request.headers });
+  if (!session?.user) {
+    throw redirect("/login");
+  }
+  console.log("user id", session.user.id);
+  console.log("session validated. loader has chat id: ", id);
+  const [chatRow] = await db
     .insert(chat)
     .values({
       chatId: id,
@@ -43,80 +45,72 @@ export function meta({}: Route.MetaArgs) {
       target: chat.chatId,
     })
     .returning();
-    
-    let chatContent = null;
-    
-    // it is already there
-    if (!chatRow) {
-      const { data, error: downloadError } = await supabase.storage
+
+  let chatContent: UIMessage[] = [];
+
+  if (!chatRow) {
+    const { data, error: downloadError } = await supabase.storage
       .from("chats")
       .download(id + ".json");
-  
-      if (downloadError) {
-        console.error("Error downloading chat file:", downloadError);
-        chatContent = {};
-      } else if (data) {
-        const text = await data.text();
-        try {
-          chatContent = JSON.parse(text);
-        } catch (e) {
-          console.error("Error parsing chat file JSON:", e);
-          chatContent = {};
+
+    if (downloadError) {
+      console.error("Error downloading chat file:", downloadError);
+    } else if (data) {
+      try {
+        const parsed = JSON.parse(await data.text());
+        // Messages loaded from Supabase should already be in valid UIMessage format
+        // Only normalize if they're not a valid array (legacy format)
+        const { messages, didNormalize } = normalizeChatMessages(parsed);
+        chatContent = messages;
+
+        if (didNormalize) {
+          const { error: uploadError } = await supabase.storage
+            .from("chats")
+            .upload(id + ".json", JSON.stringify(messages), {
+              contentType: "application/json",
+              upsert: true,
+            });
+          if (uploadError) {
+            console.error("Failed to write normalized chat history:", uploadError);
+          }
         }
+      } catch (e) {
+        console.error("Error parsing chat file JSON:", e);
       }
-  
-    } else {
-      const { error } = await supabase.storage
-        .from("chats")
-        .upload(id + ".json", JSON.stringify({}), {
-          contentType: "application/json",
-          upsert: true
+    }
+  } else {
+    const emptyHistory: UIMessage[] = [];
+    const { error } = await supabase.storage
+      .from("chats")
+      .upload(id + ".json", JSON.stringify(emptyHistory), {
+        contentType: "application/json",
+        upsert: true,
       });
-      chatContent = {};
-
+    if (error) {
+      console.error("Error creating chat file:", error);
     }
+    chatContent = emptyHistory;
+  }
 
-
-  // Optionally, return the chat content for use in the component
   return { chatContent };
-  }
-  
-  export async function action({ request }: ActionFunctionArgs) {
-    const { auth } = await import("../../lib/auth.server");
-    console.log("chat action has the id")
-    const session = await auth.api.getSession({ headers: request.headers })
-    if (!session?.user) {
-      throw redirect("/login")
-    }
-  }
+}
 
-  export function clientLoader({ serverLoader }: any) {
-    return serverLoader()
-  }
-  
-  
-  clientLoader.hydrate = true
-  
+export function clientLoader({
+  serverLoader,
+}: {
+  serverLoader: () => Promise<{ chatContent: UIMessage[] }>;
+}) {
+  return serverLoader();
+}
+
+clientLoader.hydrate = true;
 
 export default function Chat() {
-  const { id } = useParams();
-  const submit = useSubmit();
-  const { chatContent } = useLoaderData()
-  //console.log(id, chatContent)
-
-  // chat content is list of ui messages
-
-  /*const handleSubmit = () => {
-    const 
-  }*/
-  //
-
-  if (true) {
-    return <div className="h-full">
+  return (
+    <div className="h-full">
       <div className="h-full">
         <Thread />
       </div>
-  </div>
-  }
+    </div>
+  );
 }
-

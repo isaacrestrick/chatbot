@@ -20,6 +20,7 @@ import {
 import {
   forwardRef,
   useEffect,
+  useRef,
   useState,
   type ComponentPropsWithoutRef,
   type FC,
@@ -195,6 +196,27 @@ const Composer: FC = () => {
 };
 
 const ComposerAction: FC = () => {
+  const sendingRef = useRef(false);
+
+  const handleSendClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    // Defensive check: prevent multiple rapid submissions
+    // This ref persists across renders, providing a more reliable guard
+    if (sendingRef.current) {
+      e.preventDefault();
+      e.stopPropagation();
+      console.warn("Send already in progress - ignoring duplicate submission");
+      return;
+    }
+
+    sendingRef.current = true;
+
+    // Reset the flag after a delay. We use a longer delay to account
+    // for the actual streaming to begin and the UI to update
+    setTimeout(() => {
+      sendingRef.current = false;
+    }, 500);
+  };
+
   return (
     <div className="aui-composer-action-wrapper relative mx-1 mt-2 mb-2 flex items-center justify-between">
       <ComposerAddAttachment />
@@ -209,6 +231,7 @@ const ComposerAction: FC = () => {
             size="icon"
             className="aui-composer-send size-[34px] rounded-full p-1"
             aria-label="Send message"
+            onClick={handleSendClick}
           >
             <ArrowUpIcon className="aui-composer-send-icon size-5" />
           </TooltipIconButton>

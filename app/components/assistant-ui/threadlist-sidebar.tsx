@@ -18,11 +18,16 @@ import { useLocation } from 'react-router';
 
 
 export function ThreadListSidebar({
+  isStreaming,
+  onBeforeSwitch,
   ...props
-}: React.ComponentProps<typeof Sidebar>) {
+}: React.ComponentProps<typeof Sidebar> & {
+  isStreaming?: boolean;
+  onBeforeSwitch?: () => void;
+}) {
   const location = useLocation()
   const isInChat = location.pathname.includes("chat")
-  const goBackOrWelcome = () => 
+  const goBackOrWelcome = () =>
     <div className="flex justify-center items-center">
       {isInChat ? <BackButton /> : <h1> Welcome! </h1>}
     </div>
@@ -51,7 +56,7 @@ export function ThreadListSidebar({
         </div>
       </SidebarHeader>
       <SidebarContent className="aui-sidebar-content px-2">
-        <ThreadList chats={props.chats} setChats={props.setChats} revalidator={props.revalidator}/>
+        <ThreadList chats={props.chats} onChatsChange={props.onChatsChange} revalidator={props.revalidator} isStreaming={isStreaming} onBeforeSwitch={onBeforeSwitch}/>
       </SidebarContent>
       <SidebarRail />
       <SidebarFooter className="aui-sidebar-footer border-t">
