@@ -152,7 +152,7 @@ export async function action({ request }: ActionFunctionArgs) {
     const webFetchTool = anthropic.tools.webFetch_20250910({ maxUses: 1 })
 
     const result = streamText({
-        model: createdAnthropic('claude-sonnet-4-5'),
+        model: createdAnthropic('claude-haiku-4-5'),
         stopWhen: stepCountIs(100),
         headers: {"anthropic-beta": "context-management-2025-06-27,web-fetch-2025-09-10"},
         tools: {
