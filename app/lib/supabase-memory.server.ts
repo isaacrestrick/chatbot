@@ -1,13 +1,15 @@
+import * as fs from 'fs/promises';
 import * as path from 'path';
-import { type MemoryToolHandlers } from '@anthropic-ai/sdk/helpers/beta/memory';
+import { 
+    type MemoryToolHandlers } from '@anthropic-ai/sdk/helpers/beta/memory';
 import { supabase } from '~/lib/supabase-client.server';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import { file } from 'zod';
 
 
 export class SupabaseMemoryTool implements MemoryToolHandlers {
   private project_id: string;
   private memoryRoot: string;
-  private supabase: SupabaseClient;
+  private supabase: any;
 
   constructor(project_id: string) {
     this.project_id = project_id;
@@ -42,7 +44,7 @@ export class SupabaseMemoryTool implements MemoryToolHandlers {
     return fullPath;
   }
 
-  async isDirectory(path: string): Promise<boolean> {
+  async isDirectory(path) {
     const { data: folderData, error: folderError } = await supabase
     .storage
     .from('projects')
@@ -51,7 +53,7 @@ export class SupabaseMemoryTool implements MemoryToolHandlers {
     return folderExists
   }
 
-  async view(command: { path: string; view_range?: [number, number] }): Promise<string> {
+  async view(command): Promise<string> {
     const fullPath = this.validatePath(command.path);
 
     if (!(await this.exists(fullPath))) {
@@ -114,13 +116,13 @@ export class SupabaseMemoryTool implements MemoryToolHandlers {
 
       return numberedLines.join('\n');
 
-
+      
     } else {
       throw new Error(`Path not found: ${command.path}`);
     }
   }
 
-  async create(command: { path: string; file_text: string; overwrite?: boolean }): Promise<string> {
+  async create(command): Promise<string> {
     const fullPath = this.validatePath(command.path)
 
     const { error } = await supabase
@@ -134,10 +136,10 @@ export class SupabaseMemoryTool implements MemoryToolHandlers {
     if (error) throw error
 
     return `File created successfully at ${command.path}`;
-
+  
   }
 
-  async str_replace(command: { path: string; old_str: string; new_str: string }): Promise<string> {
+  async str_replace(command): Promise<string> {
     const fullPath = this.validatePath(command.path);
 
     if (!(await this.exists(fullPath))) {
@@ -175,11 +177,11 @@ export class SupabaseMemoryTool implements MemoryToolHandlers {
       })
 
     if (error) throw error
-
+    
     return `File ${command.path} has been edited`;
   }
 
-  async insert(command: { path: string; insert_line: number; insert_text: string }): Promise<string> {
+  async insert(command): Promise<string> {
     const fullPath = this.validatePath(command.path);
 
     if (!(await this.exists(fullPath))) {
@@ -216,7 +218,7 @@ export class SupabaseMemoryTool implements MemoryToolHandlers {
     return `Text inserted at line ${command.insert_line} in ${command.path}`;
   }
 
-  async delete(command: { path: string }): Promise<string> {
+  async delete(command): Promise<string> {
     const fullPath = this.validatePath(command.path);
 
     if (command.path === '/memories') {
@@ -246,7 +248,7 @@ export class SupabaseMemoryTool implements MemoryToolHandlers {
     }
   }
 
-  async rename(command: { old_path: string; new_path: string }): Promise<string> {
+  async rename(command): Promise<string> {
     const oldFullPath = this.validatePath(command.old_path);
     const newFullPath = this.validatePath(command.new_path);
 
