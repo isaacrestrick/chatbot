@@ -48,7 +48,7 @@ export default function ChatLayout() {
 
   const chat = useChat({
     id: id,
-    initialMessages: chatContentObj?.chatContent?.length > 0
+    messages: chatContentObj?.chatContent?.length > 0
     ? chatContentObj.chatContent.filter((msg: { id?: string }) => msg.id && msg.id !== "")
     : undefined,
     transport: new DefaultChatTransport({
@@ -57,7 +57,6 @@ export default function ChatLayout() {
   })
 
   const runtime = useAISDKRuntime(chat);
-
 
   return (
     <div>
