@@ -13,9 +13,9 @@ export const ThreadList: FC = (props) => {
   //console.log("revalidator", props.revalidator)
   return (
     <ThreadListPrimitive.Root className="aui-root aui-thread-list-root flex flex-col items-stretch gap-1.5">
-      <ThreadListNew revalidator={props.revalidator} optimisticUpdate={props.setChats}/>
+      <ThreadListNew revalidator={props.revalidator} onChatsUpdate={props.onChatsUpdate}/>
       {/*<ThreadListItems chats={props.chats}/>*/}
-      {props.chats.map(chat => <ThreadListItem chat={chat} key={chat.chatId} revalidator={props.revalidator} optimisticUpdate={props.setChats}/>)}
+      {props.chats.map(chat => <ThreadListItem chat={chat} key={chat.chatId} revalidator={props.revalidator} onChatsUpdate={props.onChatsUpdate}/>)}
     </ThreadListPrimitive.Root>
   );
 };
@@ -32,7 +32,7 @@ const ThreadListNew: FC = (props) => {
           const newId = crypto.randomUUID()
           navigate(`/chat/` + newId)
           const huh = props.revalidator.revalidate()
-          props.optimisticUpdate(prev => [{title: "Chat: " + newId, chatId: newId}, ...prev])
+          props.onChatsUpdate(prev => [{title: "Chat: " + newId, chatId: newId}, ...prev])
           console.log("i updated")
           console.log("i revalidated", huh)
         }}
@@ -65,7 +65,7 @@ const ThreadListItem: FC = (props) => {
       </ThreadListItemPrimitive.Trigger>
       </div>
       <div onClick={() => {
-          props.optimisticUpdate(prev => prev.filter(chat => chat.chatId !== props.chat.chatId))
+          props.onChatsUpdate(prev => prev.filter(chat => chat.chatId !== props.chat.chatId))
           const formData = new FormData();
           formData.append('test','data')
           fetcher.submit(

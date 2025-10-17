@@ -45,7 +45,7 @@ export default function ChatLayout() {
   const chatContentObj = useRouteLoaderData("chat")
   const revalidator = useRevalidator()
   
-  const [chats, setChats] = useState(chatListsObj.chats)
+  const [chats, onChatsUpdate] = useState(chatListsObj.chats)
   // useEffect(() => {
   //   if (id) {
   //     console.log("effect time")
@@ -71,11 +71,11 @@ export default function ChatLayout() {
       <AssistantRuntimeProvider runtime={runtime}>
       <SidebarProvider>
       <div className="flex h-dvh w-full">
-        <ThreadListSidebar chats={chats} setChats={setChats} revalidator={revalidator}/>
+        <ThreadListSidebar chats={chats} setChats={onChatsUpdate} revalidator={revalidator}/>
         <SidebarInset>
           {/* Add sidebar trigger, location can be customized */}
           {<SidebarTrigger className="absolute top-4 left-4 z-50" />}
-          <Outlet context={ {chats, setChats} }/>
+          <Outlet context={ {chats, setChats: onChatsUpdate} }/>
         </SidebarInset>
       </div>
     </SidebarProvider>

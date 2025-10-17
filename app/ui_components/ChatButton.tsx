@@ -6,7 +6,7 @@ export default function ChatButton(props) {
   const goChat = async () => {
     const uuid = crypto.randomUUID();
     navigate(`/chat/` + uuid)
-    props.setChats( prev => [{title: "Chat: " + uuid, chatId: uuid}, ...prev])
+    props.onChatsUpdate( prev => [{title: "Chat: " + uuid, chatId: uuid}, ...prev])
   }
 
   return (

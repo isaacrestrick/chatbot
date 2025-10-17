@@ -30,6 +30,6 @@ export async function action({ request }: ActionFunctionArgs) {
 }
 
 export default function Home({ loaderData }: Route.ComponentProps) {
-  const {chats, setChats} = useOutletContext()
-    return <div className="flex justify-center items-center min-h-screen"><div className="flex flex-col justify-center items-center text-3xl"><h1>Hello, {loaderData.user.name ? loaderData.user.name : loaderData.user.email}!</h1><div className="mt-5"><ChatButton setChats={setChats}/> <SignOutButton /></div></div></div>
+  const {chats, setChats: onChatsUpdate} = useOutletContext()
+    return <div className="flex justify-center items-center min-h-screen"><div className="flex flex-col justify-center items-center text-3xl"><h1>Hello, {loaderData.user.name ? loaderData.user.name : loaderData.user.email}!</h1><div className="mt-5"><ChatButton onChatsUpdate={onChatsUpdate}/> <SignOutButton /></div></div></div>
  }
