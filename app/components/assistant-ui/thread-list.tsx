@@ -10,54 +10,11 @@ import {
 } from "react-router";
 import { Button } from "~/components/ui/button";
 import { TooltipIconButton } from "~/components/assistant-ui/tooltip-icon-button";
+import { stopActiveStream } from "~/lib/chat-stream-control";
 
 export type ThreadSummary = {
   chatId: string;
   title: string;
-};
-
-const waitForChatIdle = async (
-  chatHook?: Pick<UseChatHelpers<any>, "status">
-) => {
-  if (!chatHook) return;
-  if (!chatHook.status || (chatHook.status !== "streaming" && chatHook.status !== "submitted")) {
-    return;
-  }
-
-  await new Promise<void>((resolve) => {
-    const timeout = setTimeout(resolve, 2000);
-    const tick = () => {
-      if (!chatHook.status || (chatHook.status !== "streaming" && chatHook.status !== "submitted")) {
-        clearTimeout(timeout);
-        resolve();
-        return;
-      }
-      setTimeout(tick, 16);
-    };
-    setTimeout(tick, 0);
-  });
-};
-
-const stopActiveStream = async (
-  chatHook?: Pick<UseChatHelpers<any>, "stop" | "status">,
-  assistantApi?: ReturnType<typeof useAssistantApi>
-) => {
-  if (chatHook?.stop) {
-    await Promise.resolve(chatHook.stop());
-  }
-
-  if (!assistantApi) return;
-
-  try {
-    const threadApi = assistantApi.thread?.();
-    await threadApi?.cancelRun?.();
-  } catch (error) {
-    if (import.meta.env.DEV) {
-      console.debug("cancelRun failed", error);
-    }
-  }
-
-  await waitForChatIdle(chatHook);
 };
 
 type ThreadListProps = {

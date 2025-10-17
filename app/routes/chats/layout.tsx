@@ -7,17 +7,18 @@ import {
   SidebarTrigger 
 } from "~/components/ui/sidebar";
 
-import { useChat, type UseChatHelpers } from '@ai-sdk/react';
+import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport } from 'ai';
 import { useAISDKRuntime } from "@assistant-ui/react-ai-sdk";
-import { AssistantRuntimeProvider } from "@assistant-ui/react";
+import { AssistantRuntimeProvider, useAssistantApi } from "@assistant-ui/react";
 import { useParams } from "react-router";
-import { useState, useEffect, type Dispatch, type SetStateAction } from 'react'
+import { useState, useEffect, useRef, type Dispatch, type SetStateAction } from 'react'
+import { stopActiveStream } from "~/lib/chat-stream-control";
 
 export type ChatLayoutContext = {
   chats: ThreadSummary[];
   updateChats: Dispatch<SetStateAction<ThreadSummary[]>>;
-  chatHook: UseChatHelpers<any>;
+  chatHook: ReturnType<typeof useChat>;
   revalidator: ReturnType<typeof useRevalidator>;
 };
 
@@ -70,6 +71,13 @@ export default function ChatLayout() {
     })
   })
   const runtime = useAISDKRuntime(chat);
+  const assistantApi = useAssistantApi();
+  const previousChatIdRef = useRef<string | undefined>(chat.id);
+  const chatRef = useRef(chat);
+
+  useEffect(() => {
+    chatRef.current = chat;
+  }, [chat]);
 
   const outletContext: ChatLayoutContext = {
     chats,
@@ -79,10 +87,17 @@ export default function ChatLayout() {
   };
 
   useEffect(() => {
+    if (previousChatIdRef.current && previousChatIdRef.current !== chat.id) {
+      void stopActiveStream(chatRef.current, assistantApi);
+    }
+    previousChatIdRef.current = chat.id;
+  }, [assistantApi, chat.id]);
+
+  useEffect(() => {
     return () => {
-      chat.stop();
+      void stopActiveStream(chatRef.current, assistantApi);
     };
-  }, [chat.id]);
+  }, [assistantApi]);
 
 
   return (
