@@ -1,17 +1,20 @@
 import { Outlet, useRevalidator, useRouteLoaderData, useLoaderData, type LoaderFunctionArgs, redirect } from "react-router";
 import { ThreadListSidebar } from "~/components/assistant-ui/threadlist-sidebar";
-import {
-  SidebarProvider, 
-  SidebarInset,
-  SidebarTrigger 
-} from "~/components/ui/sidebar";
+import { SidebarProvider } from "~/components/ui/sidebar";
 
-import { useChat } from '@ai-sdk/react';
+import { useChat, type UseChatHelpers } from '@ai-sdk/react';
 import { DefaultChatTransport } from 'ai';
-import { useAISDKRuntime } from "@assistant-ui/react-ai-sdk";
-import { AssistantRuntimeProvider } from "@assistant-ui/react";
 import { useParams } from "react-router";
-import { useState } from 'react'
+import { useState, useEffect, useRef, type Dispatch, type SetStateAction } from 'react'
+
+import type { ThreadSummary } from "~/components/assistant-ui/thread-list";
+
+export type ChatLayoutContext = {
+  chats: ThreadSummary[];
+  updateChats: Dispatch<SetStateAction<ThreadSummary[]>>;
+  chatHook: UseChatHelpers<any>;
+  revalidator: ReturnType<typeof useRevalidator>;
+};
 
 export async function loader({ request }: LoaderFunctionArgs) {
   console.log("running the layout loader")
@@ -44,42 +47,93 @@ export default function ChatLayout() {
   const chatListsObj = useLoaderData()
   const chatContentObj = useRouteLoaderData("chat")
   const revalidator = useRevalidator()
-  
+
   const [chats, setChats] = useState(chatListsObj.chats)
-  // useEffect(() => {
-  //   if (id) {
-  //     console.log("effect time")
-  //     setChats( prev => [{title: "Chat: " + id, chatId: id}, ...prev])
-  //   }
-  // }, [])
+  const [isTransitioning, setIsTransitioning] = useState(false)
+
   const chat = useChat({
     id: id,
-    messages: chatContentObj?.chatContent?.length > 0 
+    messages: chatContentObj?.chatContent?.length > 0
     ? chatContentObj.chatContent.filter((msg: any) => msg.id && msg.id !== "")
     : undefined,
     transport: new DefaultChatTransport({
         api: '/ai'
     })
   })
-  const runtime = useAISDKRuntime(chat);
+
+  const chatRef = useRef(chat);
+  chatRef.current = chat;
+
+  const prevIdRef = useRef(id);
+
+  // Cleanup and transition when switching chats
+  useEffect(() => {
+    const prevId = prevIdRef.current;
+
+    if (prevId && prevId !== id) {
+      // Starting transition
+      setIsTransitioning(true);
+
+      if (import.meta.env.DEV) {
+        console.log('Starting transition from', prevId, 'to', id);
+      }
+
+      // Stop the previous chat
+      if (chatRef.current?.stop) {
+        chatRef.current.stop();
+      }
+
+      // Wait a moment for cleanup to complete
+      const timer = setTimeout(() => {
+        setIsTransitioning(false);
+        if (import.meta.env.DEV) {
+          console.log('Transition complete, ready for new chat:', id);
+        }
+      }, 100);
+
+      prevIdRef.current = id;
+
+      return () => clearTimeout(timer);
+    } else {
+      prevIdRef.current = id;
+    }
+  }, [id]);
+
+  const outletContext: ChatLayoutContext = {
+    chats,
+    updateChats: setChats,
+    chatHook: chat,
+    revalidator,
+  };
 
 
   return (
     <div>
       <nav>{/* shared navigation */}</nav>
 
-      <AssistantRuntimeProvider runtime={runtime}>
       <SidebarProvider>
-      <div className="flex h-dvh w-full">
-        <ThreadListSidebar chats={chats} setChats={setChats} revalidator={revalidator}/>
-        <SidebarInset>
+        <div className="flex h-dvh w-full">
+          <ThreadListSidebar
+            chatHook={chat}
+            chats={chats}
+            updateChats={setChats}
+            revalidator={revalidator}
+          />
+
           {/* Add sidebar trigger, location can be customized */}
-          {<SidebarTrigger className="absolute top-4 left-4 z-50" />}
-          <Outlet context={ {chats, setChats} }/>
-        </SidebarInset>
-      </div>
-    </SidebarProvider>
-    </AssistantRuntimeProvider>
+
+          <div className="flex-1">
+            {isTransitioning ? (
+              <div className="flex h-full items-center justify-center">
+                <div className="text-muted-foreground">Switching chats...</div>
+              </div>
+            ) : (
+              <Outlet context={outletContext}/>
+            )}
+          </div>
+
+        </div>
+      </SidebarProvider>
 
       <footer>{/* shared footer */}</footer>
     </div>
