@@ -11,15 +11,27 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "~/components/ui/sidebar";
-import { ThreadList } from "~/components/assistant-ui/thread-list";
-import BackButton from '../../ui_components/BackButton'
-import { useLocation } from 'react-router';
+import { ThreadList, type ThreadSummary } from "~/components/assistant-ui/thread-list";
+import BackButton from "../../ui_components/BackButton";
+import { useLocation } from "react-router";
+import type { Dispatch, SetStateAction } from "react";
+
+type ThreadListSidebarProps = React.ComponentProps<typeof Sidebar> & {
+  chatHook: { stop?: () => Promise<void> };
+  chats: ThreadSummary[];
+  updateChats: Dispatch<SetStateAction<ThreadSummary[]>>;
+  revalidator: { revalidate: () => void };
+};
 
 
 
 export function ThreadListSidebar({
+  chatHook,
+  chats,
+  updateChats,
+  revalidator,
   ...props
-}: React.ComponentProps<typeof Sidebar>) {
+}: ThreadListSidebarProps) {
   const location = useLocation()
   const isInChat = location.pathname.includes("chat")
   const goBackOrWelcome = () => 
@@ -51,7 +63,7 @@ export function ThreadListSidebar({
         </div>
       </SidebarHeader>
       <SidebarContent className="aui-sidebar-content px-2">
-        <ThreadList chats={props.chats} onUpdateChats={props.onUpdateChats} revalidator={props.revalidator}/>
+        <ThreadList chatHook={chatHook} chats={chats} updateChats={updateChats} revalidator={revalidator}/>
       </SidebarContent>
       <SidebarRail />
       <SidebarFooter className="aui-sidebar-footer border-t">

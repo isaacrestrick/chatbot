@@ -1,17 +1,25 @@
 import { Outlet, useRevalidator, useRouteLoaderData, useLoaderData, type LoaderFunctionArgs, redirect } from "react-router";
 import { ThreadListSidebar } from "~/components/assistant-ui/threadlist-sidebar";
+import type { ThreadSummary } from "~/components/assistant-ui/thread-list";
 import {
   SidebarProvider, 
   SidebarInset,
   SidebarTrigger 
 } from "~/components/ui/sidebar";
 
-import { useChat } from '@ai-sdk/react';
+import { useChat, type UseChatHelpers } from '@ai-sdk/react';
 import { DefaultChatTransport } from 'ai';
 import { useAISDKRuntime } from "@assistant-ui/react-ai-sdk";
 import { AssistantRuntimeProvider } from "@assistant-ui/react";
 import { useParams } from "react-router";
-import { useState } from 'react'
+import { useState, type Dispatch, type SetStateAction } from 'react'
+
+export type ChatLayoutContext = {
+  chats: ThreadSummary[];
+  updateChats: Dispatch<SetStateAction<ThreadSummary[]>>;
+  chatHook: UseChatHelpers<any>;
+  revalidator: ReturnType<typeof useRevalidator>;
+};
 
 export async function loader({ request }: LoaderFunctionArgs) {
   console.log("running the layout loader")
@@ -63,6 +71,13 @@ export default function ChatLayout() {
   })
   const runtime = useAISDKRuntime(chat);
 
+  const outletContext: ChatLayoutContext = {
+    chats,
+    updateChats: setChats,
+    chatHook: chat,
+    revalidator,
+  };
+
 
   return (
     <div>
@@ -71,11 +86,11 @@ export default function ChatLayout() {
       <AssistantRuntimeProvider runtime={runtime}>
       <SidebarProvider>
       <div className="flex h-dvh w-full">
-        <ThreadListSidebar chats={chats} onUpdateChats={setChats} revalidator={revalidator}/>
+        <ThreadListSidebar chatHook={chat} chats={chats} updateChats={setChats} revalidator={revalidator}/>
         <SidebarInset>
           {/* Add sidebar trigger, location can be customized */}
           {<SidebarTrigger className="absolute top-4 left-4 z-50" />}
-          <Outlet context={ {chats, setChats} }/>
+          <Outlet context={outletContext}/>
         </SidebarInset>
       </div>
     </SidebarProvider>

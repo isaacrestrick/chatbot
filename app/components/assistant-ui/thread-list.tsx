@@ -9,16 +9,16 @@ import {
 import { Button } from "~/components/ui/button";
 import { TooltipIconButton } from "~/components/assistant-ui/tooltip-icon-button";
 
-type Thread = {
+export type ThreadSummary = {
   chatId: string;
   title: string;
 };
 
 type ThreadListProps = {
   chatHook: { stop?: () => Promise<void> };
-  chats: Thread[];
-  updateChats: Dispatch<SetStateAction<Thread[]>>;
-  revalidator: { revalidate: () => Promise<unknown> };
+  chats: ThreadSummary[];
+  updateChats: Dispatch<SetStateAction<ThreadSummary[]>>;
+  revalidator: { revalidate: () => void };
 };
 
 export const ThreadList: FC<ThreadListProps> = ({
@@ -68,10 +68,10 @@ export const ThreadList: FC<ThreadListProps> = ({
 };
 
 type ThreadListRowProps = {
-  chat: Thread;
+  chat: ThreadSummary;
   chatHook: { stop?: () => Promise<void> };
-  updateChats: Dispatch<SetStateAction<Thread[]>>;
-  revalidator: { revalidate: () => Promise<unknown> };
+  updateChats: Dispatch<SetStateAction<ThreadSummary[]>>;
+  revalidator: { revalidate: () => void };
   onNavigate: NavigateFunction;
 };
 
