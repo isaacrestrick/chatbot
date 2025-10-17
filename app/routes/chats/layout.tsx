@@ -8,7 +8,7 @@ import {
 } from "~/components/ui/sidebar";
 
 import { useChat, type UseChatHelpers } from '@ai-sdk/react';
-import { DefaultChatTransport } from 'ai';
+import { SafeChatTransport } from "~/lib/safe-chat-transport";
 import { useAISDKRuntime } from "@assistant-ui/react-ai-sdk";
 import { AssistantRuntimeProvider } from "@assistant-ui/react";
 import { useParams } from "react-router";
@@ -65,7 +65,7 @@ export default function ChatLayout() {
     messages: chatContentObj?.chatContent?.length > 0 
     ? chatContentObj.chatContent.filter((msg: any) => msg.id && msg.id !== "")
     : undefined,
-    transport: new DefaultChatTransport({
+    transport: new SafeChatTransport({
         api: '/ai'
     })
   })
