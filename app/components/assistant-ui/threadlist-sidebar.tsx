@@ -1,6 +1,5 @@
 import * as React from "react";
 import { MessagesSquare } from "lucide-react";
-//import Link from "next/link";
 import {
   Sidebar,
   SidebarContent,
@@ -14,14 +13,19 @@ import {
 import { ThreadList, type ThreadSummary } from "~/components/assistant-ui/thread-list";
 import BackButton from "../../ui_components/BackButton";
 import { useLocation } from "react-router";
+import { useCallback } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import type { UseChatHelpers } from "@ai-sdk/react";
+import { useAssistantApi } from "@assistant-ui/react";
+import { useLatestRef } from "~/hooks/use-latest-ref";
+import { stopActiveStream } from "~/lib/chat-stream-control";
 
 type ThreadListSidebarProps = React.ComponentProps<typeof Sidebar> & {
   chatHook: Pick<UseChatHelpers<any>, "stop" | "status">;
   chats: ThreadSummary[];
   updateChats: Dispatch<SetStateAction<ThreadSummary[]>>;
   revalidator: { revalidate: () => void };
+  cancelStream?: () => void | Promise<void>;
 };
 
 
@@ -31,13 +35,23 @@ export function ThreadListSidebar({
   chats,
   updateChats,
   revalidator,
+  cancelStream,
   ...props
 }: ThreadListSidebarProps) {
   const location = useLocation()
   const isInChat = location.pathname.includes("chat")
-  const goBackOrWelcome = () => 
+  const assistantApi = useAssistantApi();
+  const statusRef = useLatestRef(chatHook.status);
+  const getStatus = useCallback(() => statusRef.current, [statusRef]);
+  const stopCurrentStream = useCallback(() => stopActiveStream({
+    stop: chatHook.stop,
+    assistantApi,
+    getStatus,
+    cancelTransport: cancelStream,
+  }), [chatHook.stop, assistantApi, getStatus, cancelStream]);
+  const goBackOrWelcome = () =>
     <div className="flex justify-center items-center">
-      {isInChat ? <BackButton /> : <h1> Welcome! </h1>}
+      {isInChat ? <BackButton beforeNavigate={stopCurrentStream} /> : <h1> Welcome! </h1>}
     </div>
     //console.log("down to thradlistsidebar", props.chats)
 
@@ -64,7 +78,15 @@ export function ThreadListSidebar({
         </div>
       </SidebarHeader>
       <SidebarContent className="aui-sidebar-content px-2">
-        <ThreadList chatHook={chatHook} chats={chats} updateChats={updateChats} revalidator={revalidator}/>
+        <ThreadList
+          chatHook={chatHook}
+          chats={chats}
+          updateChats={updateChats}
+          revalidator={revalidator}
+          assistantApi={assistantApi}
+          cancelStream={cancelStream}
+          getStatus={getStatus}
+        />
       </SidebarContent>
       <SidebarRail />
       <SidebarFooter className="aui-sidebar-footer border-t">

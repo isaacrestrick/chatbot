@@ -1,14 +1,24 @@
-import { useNavigate } from "react-router"
-import { Button } from "~/components/ui/button"
+import { useNavigate } from "react-router";
+import { Button } from "~/components/ui/button";
 
-export default function BackButton() {
-  const navigate = useNavigate()
+type BackButtonProps = {
+  beforeNavigate?: () => void | Promise<void>;
+};
+
+export default function BackButton({ beforeNavigate }: BackButtonProps) {
+  const navigate = useNavigate();
 
   const goHome = async () => {
-    navigate("/")
-  }
+    if (beforeNavigate) {
+      await beforeNavigate();
+    }
+
+    navigate("/");
+  };
 
   return (
-    <Button type="button" className="fixed" onClick={goHome}>Go Back</Button>
-  )
+    <Button type="button" className="fixed" onClick={goHome}>
+      Go Back
+    </Button>
+  );
 }

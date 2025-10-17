@@ -12,13 +12,14 @@ import { DefaultChatTransport } from 'ai';
 import { useAISDKRuntime } from "@assistant-ui/react-ai-sdk";
 import { AssistantRuntimeProvider } from "@assistant-ui/react";
 import { useParams } from "react-router";
-import { useState, useEffect, type Dispatch, type SetStateAction } from 'react'
+import { useState, useEffect, useMemo, useRef, useCallback, type Dispatch, type SetStateAction } from 'react'
 
 export type ChatLayoutContext = {
   chats: ThreadSummary[];
   updateChats: Dispatch<SetStateAction<ThreadSummary[]>>;
   chatHook: UseChatHelpers<any>;
   revalidator: ReturnType<typeof useRevalidator>;
+  cancelStream: () => void;
 };
 
 export async function loader({ request }: LoaderFunctionArgs) {
@@ -60,29 +61,76 @@ export default function ChatLayout() {
   //     setChats( prev => [{title: "Chat: " + id, chatId: id}, ...prev])
   //   }
   // }, [])
+  const activeRequestAbortRef = useRef<AbortController | null>(null);
+
+  const fetchWithAbort = useCallback(
+    async (input: RequestInfo | URL, init?: RequestInit) => {
+      activeRequestAbortRef.current?.abort();
+
+      const controller = new AbortController();
+      activeRequestAbortRef.current = controller;
+
+      if (init?.signal) {
+        if (init.signal.aborted) {
+          controller.abort();
+        } else {
+          const abortCurrent = () => controller.abort();
+          init.signal.addEventListener("abort", abortCurrent, { once: true });
+          controller.signal.addEventListener(
+            "abort",
+            () => init.signal?.removeEventListener("abort", abortCurrent),
+            { once: true }
+          );
+        }
+      }
+
+      const nextInit: RequestInit = {
+        ...init,
+        signal: controller.signal,
+      };
+
+      return fetch(input, nextInit);
+    },
+    []
+  );
+
+  const transport = useMemo(
+    () =>
+      new DefaultChatTransport({
+        api: '/ai',
+        fetch: fetchWithAbort,
+      }),
+    [fetchWithAbort]
+  );
+
   const chat = useChat({
     id: id,
-    messages: chatContentObj?.chatContent?.length > 0 
+    messages: chatContentObj?.chatContent?.length > 0
     ? chatContentObj.chatContent.filter((msg: any) => msg.id && msg.id !== "")
     : undefined,
-    transport: new DefaultChatTransport({
-        api: '/ai'
-    })
+    transport,
   })
   const runtime = useAISDKRuntime(chat);
+
+  const cancelStream = useCallback(() => {
+    activeRequestAbortRef.current?.abort();
+    activeRequestAbortRef.current = null;
+    void chat.stop();
+  }, [chat]);
 
   const outletContext: ChatLayoutContext = {
     chats,
     updateChats: setChats,
     chatHook: chat,
     revalidator,
+    cancelStream,
   };
 
   useEffect(() => {
     return () => {
-      chat.stop();
+      cancelStream();
     };
-  }, [chat.id]);
+  }, [chat.id, cancelStream]);
 
 
   return (
@@ -92,7 +140,13 @@ export default function ChatLayout() {
       <AssistantRuntimeProvider key={id ?? "__root"} runtime={runtime}>
       <SidebarProvider>
       <div className="flex h-dvh w-full">
-        <ThreadListSidebar chatHook={chat} chats={chats} updateChats={setChats} revalidator={revalidator}/>
+        <ThreadListSidebar
+          chatHook={chat}
+          chats={chats}
+          updateChats={setChats}
+          revalidator={revalidator}
+          cancelStream={cancelStream}
+        />
         <SidebarInset>
           {/* Add sidebar trigger, location can be customized */}
           {<SidebarTrigger className="absolute top-4 left-4 z-50" />}

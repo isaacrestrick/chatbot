@@ -1,6 +1,5 @@
-import { type FC, type Dispatch, type SetStateAction } from "react";
+import { useCallback, type FC, type Dispatch, type SetStateAction } from "react";
 import type { UseChatHelpers } from "@ai-sdk/react";
-import { useAssistantApi } from "@assistant-ui/react";
 import { ArchiveIcon, PlusIcon } from "lucide-react";
 import {
   useNavigate,
@@ -10,54 +9,16 @@ import {
 } from "react-router";
 import { Button } from "~/components/ui/button";
 import { TooltipIconButton } from "~/components/assistant-ui/tooltip-icon-button";
+import { useLatestRef } from "~/hooks/use-latest-ref";
+import {
+  stopActiveStream,
+  type ChatStatusGetter,
+} from "~/lib/chat-stream-control";
+import type { useAssistantApi } from "@assistant-ui/react";
 
 export type ThreadSummary = {
   chatId: string;
   title: string;
-};
-
-const waitForChatIdle = async (
-  chatHook?: Pick<UseChatHelpers<any>, "status">
-) => {
-  if (!chatHook) return;
-  if (!chatHook.status || (chatHook.status !== "streaming" && chatHook.status !== "submitted")) {
-    return;
-  }
-
-  await new Promise<void>((resolve) => {
-    const timeout = setTimeout(resolve, 2000);
-    const tick = () => {
-      if (!chatHook.status || (chatHook.status !== "streaming" && chatHook.status !== "submitted")) {
-        clearTimeout(timeout);
-        resolve();
-        return;
-      }
-      setTimeout(tick, 16);
-    };
-    setTimeout(tick, 0);
-  });
-};
-
-const stopActiveStream = async (
-  chatHook?: Pick<UseChatHelpers<any>, "stop" | "status">,
-  assistantApi?: ReturnType<typeof useAssistantApi>
-) => {
-  if (chatHook?.stop) {
-    await Promise.resolve(chatHook.stop());
-  }
-
-  if (!assistantApi) return;
-
-  try {
-    const threadApi = assistantApi.thread?.();
-    await threadApi?.cancelRun?.();
-  } catch (error) {
-    if (import.meta.env.DEV) {
-      console.debug("cancelRun failed", error);
-    }
-  }
-
-  await waitForChatIdle(chatHook);
 };
 
 type ThreadListProps = {
@@ -65,6 +26,9 @@ type ThreadListProps = {
   chats: ThreadSummary[];
   updateChats: Dispatch<SetStateAction<ThreadSummary[]>>;
   revalidator: { revalidate: () => void };
+  assistantApi?: ReturnType<typeof useAssistantApi>;
+  cancelStream?: () => void | Promise<void>;
+  getStatus?: ChatStatusGetter;
 };
 
 export const ThreadList: FC<ThreadListProps> = ({
@@ -72,12 +36,21 @@ export const ThreadList: FC<ThreadListProps> = ({
   updateChats,
   revalidator,
   chatHook,
+  assistantApi,
+  cancelStream,
+  getStatus,
 }) => {
   const navigate = useNavigate();
-  const assistantApi = useAssistantApi();
+  const statusRef = useLatestRef(chatHook.status);
+  const resolveStatus = useCallback<ChatStatusGetter>(() => getStatus?.() ?? statusRef.current, [getStatus, statusRef]);
 
   const handleCreateThread = async () => {
-    await stopActiveStream(chatHook, assistantApi);
+    await stopActiveStream({
+      stop: chatHook.stop,
+      assistantApi,
+      getStatus: resolveStatus,
+      cancelTransport: cancelStream,
+    });
     const newId = crypto.randomUUID();
 
     updateChats((prev) => [{ title: `Chat: ${newId}`, chatId: newId }, ...prev]);
@@ -106,6 +79,8 @@ export const ThreadList: FC<ThreadListProps> = ({
             onNavigate={navigate}
             chatHook={chatHook}
             assistantApi={assistantApi}
+            cancelStream={cancelStream}
+            getStatus={resolveStatus}
           />
         ))}
       </div>
@@ -119,7 +94,9 @@ type ThreadListRowProps = {
   updateChats: Dispatch<SetStateAction<ThreadSummary[]>>;
   revalidator: { revalidate: () => void };
   onNavigate: NavigateFunction;
-  assistantApi: ReturnType<typeof useAssistantApi>;
+  assistantApi?: ReturnType<typeof useAssistantApi>;
+  cancelStream?: () => void | Promise<void>;
+  getStatus: ChatStatusGetter;
 };
 
 const ThreadListRow: FC<ThreadListRowProps> = ({
@@ -129,6 +106,8 @@ const ThreadListRow: FC<ThreadListRowProps> = ({
   revalidator,
   onNavigate,
   assistantApi,
+  cancelStream,
+  getStatus,
 }) => {
   const fetcher = useFetcher();
   const { id } = useParams();
@@ -136,14 +115,24 @@ const ThreadListRow: FC<ThreadListRowProps> = ({
   const isActive = chat.chatId === id;
 
   const handleSelect = async () => {
-    await stopActiveStream(chatHook, assistantApi);
+    await stopActiveStream({
+      stop: chatHook.stop,
+      assistantApi,
+      getStatus,
+      cancelTransport: cancelStream,
+    });
     onNavigate(`/chat/${chat.chatId}`);
     revalidator.revalidate();
   };
 
   const handleDelete = async () => {
     if (isActive) {
-      await stopActiveStream(chatHook, assistantApi);
+      await stopActiveStream({
+        stop: chatHook.stop,
+        assistantApi,
+        getStatus,
+        cancelTransport: cancelStream,
+      });
     }
     updateChats((prev) => prev.filter((entry) => entry.chatId !== chat.chatId));
 

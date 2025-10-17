@@ -31,7 +31,7 @@ export async function action({ request }: ActionFunctionArgs) {
 }
 
 export default function Home({ loaderData }: Route.ComponentProps) {
-  const { updateChats, chatHook, revalidator } = useOutletContext<ChatLayoutContext>();
+  const { updateChats, chatHook, revalidator, cancelStream } = useOutletContext<ChatLayoutContext>();
   return (
     <div className="flex justify-center items-center min-h-screen">
       <div className="flex flex-col justify-center items-center text-3xl">
@@ -43,6 +43,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
             updateChats={updateChats}
             chatHook={chatHook}
             revalidator={revalidator}
+            cancelStream={cancelStream}
           />
           <SignOutButton />
         </div>
