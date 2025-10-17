@@ -2,6 +2,7 @@ import type { Route } from "./+types/home";
 import { redirect, useOutlet, useOutletContext, type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router'
 import SignOutButton from '~/ui_components/SignOutButton'
 import ChatButton from '../../ui_components/ChatButton'
+import type { ChatLayoutContext } from "./layout";
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "User Home. Will probably list out chats and include a new chat button later" },
@@ -30,6 +31,6 @@ export async function action({ request }: ActionFunctionArgs) {
 }
 
 export default function Home({ loaderData }: Route.ComponentProps) {
-  const {chats, setChats} = useOutletContext()
-    return <div className="flex justify-center items-center min-h-screen"><div className="flex flex-col justify-center items-center text-3xl"><h1>Hello, {loaderData.user.name ? loaderData.user.name : loaderData.user.email}!</h1><div className="mt-5"><ChatButton setChats={setChats}/> <SignOutButton /></div></div></div>
+  const { chats, updateChats } = useOutletContext<ChatLayoutContext>()
+    return <div className="flex justify-center items-center min-h-screen"><div className="flex flex-col justify-center items-center text-3xl"><h1>Hello, {loaderData.user.name ? loaderData.user.name : loaderData.user.email}!</h1><div className="mt-5"><ChatButton updateChats={updateChats}/> <SignOutButton /></div></div></div>
  }

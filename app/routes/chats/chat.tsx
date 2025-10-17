@@ -1,9 +1,13 @@
 import { Thread } from '~/components/assistant-ui/thread'
 
-import { useParams, useSubmit, useLoaderData } from 'react-router';
+import { useParams, useSubmit, useLoaderData, useOutletContext } from 'react-router';
 
 import type { Route } from "./+types/home";
 import { redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router'
+import { AssistantRuntimeProvider } from "@assistant-ui/react";
+import { useAISDKRuntime } from "@assistant-ui/react-ai-sdk";
+import type { ChatLayoutContext } from "./layout";
+import { useEffect, useRef } from 'react';
 
 
 export function meta({}: Route.MetaArgs) {
@@ -102,21 +106,32 @@ export default function Chat() {
   const { id } = useParams();
   const submit = useSubmit();
   const { chatContent } = useLoaderData()
-  //console.log(id, chatContent)
+  const { chatHook } = useOutletContext<ChatLayoutContext>();
 
-  // chat content is list of ui messages
+  const runtime = useAISDKRuntime(chatHook);
 
-  /*const handleSubmit = () => {
-    const 
-  }*/
-  //
+  // Cleanup only when component unmounts (switching away from this chat)
+  useEffect(() => {
+    return () => {
+      // Component is unmounting - stop any active streams
+      if (chatHook?.stop) {
+        chatHook.stop();
+      }
 
-  if (true) {
-    return <div className="h-full">
+      if (import.meta.env.DEV) {
+        console.log('Chat component unmounting, cleaning up:', id);
+      }
+    };
+  }, []); // Empty deps - only run on mount/unmount
+
+  return (
+    <AssistantRuntimeProvider key={id ?? "__root"} runtime={runtime}>
       <div className="h-full">
-        <Thread />
+        <div className="h-full">
+          <Thread />
+        </div>
       </div>
-  </div>
-  }
+    </AssistantRuntimeProvider>
+  );
 }
 

@@ -43,12 +43,12 @@ export const Thread: FC = () => {
     <LazyMotion features={domAnimation}>
       <MotionConfig reducedMotion="user">
         <ThreadPrimitive.Root
-          className="aui-root aui-thread-root @container flex h-screen flex-col bg-background"
+          className="aui-root aui-thread-root @container relative flex h-screen flex-col bg-background"
           style={{
             ["--thread-max-width" as string]: "44rem",
           }}
         >
-          <ThreadPrimitive.Viewport className="aui-thread-viewport h-screen relative flex flex-1 flex-col overflow-x-auto overflow-y-scroll px-4">
+          <ThreadPrimitive.Viewport className="aui-thread-viewport relative flex h-screen flex-1 flex-col overflow-x-auto overflow-y-scroll px-4 pb-24 md:pb-28">
             <ThreadWelcome />
 
             <ThreadPrimitive.Messages
@@ -59,7 +59,7 @@ export const Thread: FC = () => {
               }}
             />
             <ThreadPrimitive.If empty={false}>
-              <div className="aui-thread-viewport-spacer min-h-34 grow" />
+              <div className="aui-thread-viewport-spacer min-h-12" />
             </ThreadPrimitive.If>
           </ThreadPrimitive.Viewport>
             <Composer />
@@ -174,7 +174,7 @@ const ThreadWelcomeSuggestions: FC = () => {
 
 const Composer: FC = () => {
   return (
-    <div className="aui-composer-wrapper absolute left-1/2 -translate-x-1/2 mt-20 bottom-0 mx-auto flex w-full max-w-[var(--thread-max-width)] flex-col gap-4 overflow-visible rounded-t-3xl bg-background pb-4 md:pb-4">
+    <div className="aui-composer-wrapper absolute inset-x-0 bottom-0 mx-auto flex w-full max-w-[var(--thread-max-width)] flex-col gap-2 overflow-visible rounded-t-3xl bg-gradient-to-t from-background/97 via-background/85 to-transparent px-4 pb-3 pt-2 md:pb-4">
       <ThreadScrollToBottom />
       <ThreadPrimitive.Empty>
         <ThreadWelcomeSuggestions />
