@@ -4,7 +4,7 @@ import SignOutButton from '~/ui_components/SignOutButton'
 import ChatButton from '../../ui_components/ChatButton'
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "User Home. Will probably list out chats and include a new chat button later" },
+    { title: "Researcher - Home" },
     { name: "description", content: "Welcome to chatbot!" },
   ];
 }

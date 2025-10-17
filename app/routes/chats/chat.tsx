@@ -8,7 +8,7 @@ import { redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from 'reac
 
 export function meta({}: Route.MetaArgs) {
     return [
-      { title: "Chat page" },
+      { title: "Researcher - Chat" },
       { name: "description", content: "This is the chat page" },
     ];
   }
