@@ -2,22 +2,25 @@ import { Outlet, useRevalidator, useRouteLoaderData, useLoaderData, type LoaderF
 import { ThreadListSidebar } from "~/components/assistant-ui/threadlist-sidebar";
 import type { ThreadSummary } from "~/components/assistant-ui/thread-list";
 import {
-  SidebarProvider, 
+  SidebarProvider,
   SidebarInset,
-  SidebarTrigger 
+  SidebarTrigger
 } from "~/components/ui/sidebar";
 
 import { useChat, type UseChatHelpers } from '@ai-sdk/react';
-import { DefaultChatTransport } from 'ai';
+import { DefaultChatTransport, type UIMessage } from 'ai';
 import { useAISDKRuntime } from "@assistant-ui/react-ai-sdk";
-import { AssistantRuntimeProvider } from "@assistant-ui/react";
+import { AssistantRuntimeProvider, useAssistantApi } from "@assistant-ui/react";
 import { useParams } from "react-router";
 import { useState, useEffect, type Dispatch, type SetStateAction } from 'react'
+import { stopActiveStream } from "~/lib/chat/stream-control";
+
+type GenericChatHelpers = UseChatHelpers<UIMessage<any, any, any>>;
 
 export type ChatLayoutContext = {
   chats: ThreadSummary[];
   updateChats: Dispatch<SetStateAction<ThreadSummary[]>>;
-  chatHook: UseChatHelpers<any>;
+  chatHook: GenericChatHelpers;
   revalidator: ReturnType<typeof useRevalidator>;
 };
 
@@ -78,31 +81,43 @@ export default function ChatLayout() {
     revalidator,
   };
 
-  useEffect(() => {
-    return () => {
-      chat.stop();
-    };
-  }, [chat.id]);
-
-
   return (
     <div>
       <nav>{/* shared navigation */}</nav>
 
       <AssistantRuntimeProvider key={id ?? "__root"} runtime={runtime}>
-      <SidebarProvider>
-      <div className="flex h-dvh w-full">
-        <ThreadListSidebar chatHook={chat} chats={chats} updateChats={setChats} revalidator={revalidator}/>
-        <SidebarInset>
-          {/* Add sidebar trigger, location can be customized */}
-          {<SidebarTrigger className="absolute top-4 left-4 z-50" />}
-          <Outlet context={outletContext}/>
-        </SidebarInset>
-      </div>
-    </SidebarProvider>
-    </AssistantRuntimeProvider>
+        <ActiveChatStreamGuard chat={chat} chatId={chat.id} />
+        <SidebarProvider>
+          <div className="flex h-dvh w-full">
+            <ThreadListSidebar chatHook={chat} chats={chats} updateChats={setChats} revalidator={revalidator}/>
+            <SidebarInset>
+              {/* Add sidebar trigger, location can be customized */}
+              {<SidebarTrigger className="absolute top-4 left-4 z-50" />}
+              <Outlet context={outletContext}/>
+            </SidebarInset>
+          </div>
+        </SidebarProvider>
+      </AssistantRuntimeProvider>
 
       <footer>{/* shared footer */}</footer>
     </div>
   );
 }
+
+type ActiveChatStreamGuardProps = {
+  chat: GenericChatHelpers;
+  chatId?: string;
+};
+
+const ActiveChatStreamGuard = ({ chat, chatId }: ActiveChatStreamGuardProps) => {
+  const assistantApi = useAssistantApi();
+
+  useEffect(() => {
+    const currentChat = chat;
+    return () => {
+      void stopActiveStream(currentChat, assistantApi);
+    };
+  }, [assistantApi, chatId]);
+
+  return null;
+};
