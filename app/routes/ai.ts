@@ -161,6 +161,7 @@ export async function action({ request }: ActionFunctionArgs) {
             web_search: webSearchTool,
             memory
           },
+        abortSignal: request.signal,
         messages: [    { role: 'system', content: 
           `
           IMPORTANT: ALWAYS VIEW YOUR MEMORY DIRECTORY BEFORE DOING ANYTHING ELSE.
@@ -184,6 +185,9 @@ ASSUME INTERRUPTION: Your context window might be reset at any moment, so you ri
       originalMessages: messages,
       generateMessageId: idGenerator,
       onFinish: async ({ messages }) => {
+        if (request.signal.aborted) {
+          return;
+        }
         const messagesWithIds = messages.map(msg => ({
           ...msg,
           id: msg.id && msg.id !== "" ? msg.id : idGenerator()

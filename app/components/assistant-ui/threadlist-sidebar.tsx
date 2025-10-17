@@ -15,9 +15,10 @@ import { ThreadList, type ThreadSummary } from "~/components/assistant-ui/thread
 import BackButton from "../../ui_components/BackButton";
 import { useLocation } from "react-router";
 import type { Dispatch, SetStateAction } from "react";
+import type { UseChatHelpers } from "@ai-sdk/react";
 
 type ThreadListSidebarProps = React.ComponentProps<typeof Sidebar> & {
-  chatHook: { stop?: () => Promise<void> };
+  chatHook: Pick<UseChatHelpers<any>, "stop" | "status">;
   chats: ThreadSummary[];
   updateChats: Dispatch<SetStateAction<ThreadSummary[]>>;
   revalidator: { revalidate: () => void };

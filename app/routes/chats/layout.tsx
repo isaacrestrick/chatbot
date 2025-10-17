@@ -12,7 +12,7 @@ import { DefaultChatTransport } from 'ai';
 import { useAISDKRuntime } from "@assistant-ui/react-ai-sdk";
 import { AssistantRuntimeProvider } from "@assistant-ui/react";
 import { useParams } from "react-router";
-import { useState, type Dispatch, type SetStateAction } from 'react'
+import { useState, useEffect, type Dispatch, type SetStateAction } from 'react'
 
 export type ChatLayoutContext = {
   chats: ThreadSummary[];
@@ -78,12 +78,18 @@ export default function ChatLayout() {
     revalidator,
   };
 
+  useEffect(() => {
+    return () => {
+      chat.stop();
+    };
+  }, [chat.id]);
+
 
   return (
     <div>
       <nav>{/* shared navigation */}</nav>
 
-      <AssistantRuntimeProvider runtime={runtime}>
+      <AssistantRuntimeProvider key={id ?? "__root"} runtime={runtime}>
       <SidebarProvider>
       <div className="flex h-dvh w-full">
         <ThreadListSidebar chatHook={chat} chats={chats} updateChats={setChats} revalidator={revalidator}/>
