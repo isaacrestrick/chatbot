@@ -121,7 +121,6 @@ return result.toUIMessageStreamResponse({
 <div onClick={() => {
   navigate("chat/" + props.chat.chatId)  // ❌ Immediate navigation
   props.revalidator.revalidate()
-  console.log("hi im navigating in the div i made hehe")
 }}>
 ```
 
