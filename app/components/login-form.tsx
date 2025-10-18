@@ -11,6 +11,16 @@ import { Input } from "~/components/ui/input"
 import { Label } from "~/components/ui/label"
 import { Form, useNavigate, Link } from "react-router"
 import { authClient } from "~/lib/auth-client"
+import { useState } from "react"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "~/components/ui/alert-dialog"
 
 
 export function LoginForm({
@@ -18,6 +28,8 @@ export function LoginForm({
   ...props
 }: React.ComponentProps<"div">) {
   const navigate = useNavigate()
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+
   const signIn = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -40,8 +52,7 @@ export function LoginForm({
           navigate("/")
         },
         onError: (ctx) => {
-
-          alert(ctx.error)
+          setErrorMessage(ctx.error.message || "An error occurred during sign in")
         },
       },
     )
@@ -61,8 +72,7 @@ export function LoginForm({
           navigate("/")
         },
         onError: (ctx) => {
-
-          alert(ctx.error)
+          setErrorMessage(ctx.error.message || "An error occurred during sign in")
         },
       },
     )
@@ -119,6 +129,22 @@ export function LoginForm({
           </form>
         </CardContent>
       </Card>
+
+      <AlertDialog open={!!errorMessage} onOpenChange={(open) => !open && setErrorMessage(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Authentication Error</AlertDialogTitle>
+            <AlertDialogDescription>
+              {errorMessage}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setErrorMessage(null)}>
+              OK
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
