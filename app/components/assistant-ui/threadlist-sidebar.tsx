@@ -1,5 +1,5 @@
 import * as React from "react";
-import { MessagesSquare, FolderIcon } from "lucide-react";
+import { MessagesSquare, FolderIcon, ArrowLeft } from "lucide-react";
 import { Link } from "react-router";
 import {
   Sidebar,
@@ -44,31 +44,18 @@ export function ThreadListSidebar({
   return (
     <Sidebar {...sidebarProps}>
       <SidebarHeader className="aui-sidebar-header mb-2 border-b">
-        <div className="aui-sidebar-header-content flex flex-col gap-2 p-2">
+        <div className="aui-sidebar-header-content flex items-center justify-between">
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton size="lg" asChild>
-                <Link to="/">
-                  <div className="aui-sidebar-header-icon-wrapper flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                    <MessagesSquare className="aui-sidebar-header-icon size-4" />
-                  </div>
-                  <div className="aui-sidebar-header-heading flex flex-col gap-0.5 leading-none">
-                    <span className="aui-sidebar-header-title font-semibold">
-                      Researcher
-                    </span>
-                  </div>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton size="lg" asChild>
                 <Link to="/memories">
+                  <ArrowLeft className="size-4" />
                   <div className="aui-sidebar-header-icon-wrapper flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
                     <FolderIcon className="aui-sidebar-header-icon size-4" />
                   </div>
-                  <div className="aui-sidebar-header-heading flex flex-col gap-0.5 leading-none">
+                  <div className="aui-sidebar-header-heading mr-6 flex flex-col gap-0.5 leading-none">
                     <span className="aui-sidebar-header-title font-semibold">
-                      Memories
+                      Go To Memories
                     </span>
                   </div>
                 </Link>
