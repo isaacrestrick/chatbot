@@ -26,6 +26,7 @@ export type ChatLayoutContext = {
   setTree?: Dispatch<SetStateAction<FileNode[]>>;
   selectedFile?: string | null;
   setSelectedFile?: Dispatch<SetStateAction<string | null>>;
+  lastFileSelected?: string | null;
 };
 
 export async function loader({ request }: LoaderFunctionArgs) {
@@ -75,14 +76,22 @@ export default function ChatLayout() {
 
   const isMemoriesView = location.pathname === '/memories'
 
-  // Track last chat ID in localStorage
+  // Track last chat ID in sessionStorage
   useEffect(() => {
     if (id) {
-      localStorage.setItem('lastChatId', id);
+      sessionStorage.setItem('lastChatId', id);
     }
   }, [id]);
 
-  const lastChatId = typeof window !== 'undefined' ? localStorage.getItem('lastChatId') : null;
+  // Track last selected file in sessionStorage
+  useEffect(() => {
+    if (selectedFile) {
+      sessionStorage.setItem('lastFileSelected', selectedFile);
+    }
+  }, [selectedFile]);
+
+  const lastChatId = typeof window !== 'undefined' ? sessionStorage.getItem('lastChatId') : null;
+  const lastFileSelected = typeof window !== 'undefined' ? sessionStorage.getItem('lastFileSelected') : null;
 
   const chat = useChat({
     id: id,
@@ -209,6 +218,7 @@ export default function ChatLayout() {
     setTree,
     selectedFile,
     setSelectedFile,
+    lastFileSelected,
   };
 
 

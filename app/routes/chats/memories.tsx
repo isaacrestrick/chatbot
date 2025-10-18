@@ -25,7 +25,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 export default function Memories() {
   const { userId } = useLoaderData<typeof loader>();
-  const { tree, setTree, selectedFile } = useOutletContext<ChatLayoutContext>();
+  const { tree, setTree, selectedFile, setSelectedFile, lastFileSelected } = useOutletContext<ChatLayoutContext>();
   const [fileContent, setFileContent] = useState<string>('');
   const [loading, setLoading] = useState(true);
 
@@ -44,6 +44,13 @@ export default function Memories() {
     }
     loadTree();
   }, [setTree]);
+
+  // Auto-select last file when navigating to memories
+  useEffect(() => {
+    if (!selectedFile && lastFileSelected && !loading && tree && tree.length > 0) {
+      setSelectedFile?.(lastFileSelected);
+    }
+  }, [selectedFile, lastFileSelected, loading, tree, setSelectedFile]);
 
   // Load file content when file is selected
   useEffect(() => {
