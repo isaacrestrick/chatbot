@@ -1,6 +1,6 @@
 import * as React from "react";
-import { MessagesSquare } from "lucide-react";
-//import Link from "next/link";
+import { MessagesSquare, FolderIcon } from "lucide-react";
+import { Link } from "react-router";
 import {
   Sidebar,
   SidebarContent,
@@ -43,24 +43,20 @@ export function ThreadListSidebar({
 
   return (
     <Sidebar {...sidebarProps}>
-      <SidebarHeader className="aui-sidebar-header mb-2 border-b">
-        <div className="aui-sidebar-header-content flex items-center justify-between">
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton size="lg" asChild>
-                <div>
-                  <div className="aui-sidebar-header-icon-wrapper flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                    <MessagesSquare className="aui-sidebar-header-icon size-4" />
-                  </div>
-                  <div className="aui-sidebar-header-heading mr-6 flex flex-col gap-0.5 leading-none">
-                    <span className="aui-sidebar-header-title font-semibold">
-                      Researcher
-                    </span>
-                  </div>
-                </div>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
+      <SidebarHeader className="aui-sidebar-header border-b px-3 py-3">
+        <div className="flex gap-2">
+          <Link to="/" className="flex-1">
+            <button className="flex w-full items-center justify-center gap-1.5 rounded-md bg-sidebar-accent px-2 py-2 text-sm font-medium transition-all hover:bg-sidebar-accent/90">
+              <MessagesSquare className="size-4 shrink-0" />
+              <span className="truncate">Chats</span>
+            </button>
+          </Link>
+          <Link to="/memories" className="flex-1">
+            <button className="flex w-full items-center justify-center gap-1.5 rounded-md px-2 py-2 text-sm font-medium transition-all hover:bg-muted">
+              <FolderIcon className="size-4 shrink-0" />
+              <span className="truncate">Memories</span>
+            </button>
+          </Link>
         </div>
       </SidebarHeader>
       <SidebarContent className="aui-sidebar-content px-2">

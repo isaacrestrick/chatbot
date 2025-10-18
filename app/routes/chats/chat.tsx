@@ -12,8 +12,8 @@ import { useEffect, useRef } from 'react';
 
 export function meta({}: Route.MetaArgs) {
     return [
-      { title: "Chat page" },
-      { name: "description", content: "This is the chat page" },
+      { title: "Researcher" },
+      { name: "description", content: "AI Research Chat" },
     ];
   }
   

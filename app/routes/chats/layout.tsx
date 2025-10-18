@@ -1,5 +1,5 @@
-import { Outlet, useRevalidator, useRouteLoaderData, useLoaderData, type LoaderFunctionArgs, redirect } from "react-router";
-import { ThreadListSidebar } from "~/components/assistant-ui/threadlist-sidebar";
+import { Outlet, useRevalidator, useRouteLoaderData, useLoaderData, useNavigation, useLocation, type LoaderFunctionArgs, redirect } from "react-router";
+import { UnifiedSidebar } from "~/components/assistant-ui/unified-sidebar";
 import { SidebarProvider } from "~/components/ui/sidebar";
 
 import { useChat, type UseChatHelpers } from '@ai-sdk/react';
@@ -9,11 +9,24 @@ import { useState, useEffect, useRef, type Dispatch, type SetStateAction } from 
 
 import type { ThreadSummary } from "~/components/assistant-ui/thread-list";
 
+interface FileNode {
+  name: string;
+  path: string;
+  type: 'file' | 'folder';
+  children?: FileNode[];
+}
+
 export type ChatLayoutContext = {
   chats: ThreadSummary[];
   updateChats: Dispatch<SetStateAction<ThreadSummary[]>>;
   chatHook: UseChatHelpers<any>;
   revalidator: ReturnType<typeof useRevalidator>;
+  // Memory-specific context
+  tree?: FileNode[];
+  setTree?: Dispatch<SetStateAction<FileNode[]>>;
+  selectedFile?: string | null;
+  setSelectedFile?: Dispatch<SetStateAction<string | null>>;
+  lastFileSelected?: string | null;
 };
 
 export async function loader({ request }: LoaderFunctionArgs) {
@@ -44,12 +57,41 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 export default function ChatLayout() {
   const {id} = useParams()
+  const location = useLocation()
   const chatListsObj = useLoaderData()
   const chatContentObj = useRouteLoaderData("chat")
   const revalidator = useRevalidator()
+  const navigation = useNavigation()
 
   const [chats, setChats] = useState(chatListsObj.chats)
   const [isTransitioning, setIsTransitioning] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  // Memory state
+  const [tree, setTree] = useState<FileNode[]>([])
+  const [selectedFile, setSelectedFile] = useState<string | null>(null)
+  const [fileToDelete, setFileToDelete] = useState<string | null>(null)
+  const [showNewFileDialog, setShowNewFileDialog] = useState(false)
+  const [newFileName, setNewFileName] = useState('')
+
+  const isMemoriesView = location.pathname === '/memories'
+
+  // Track last chat ID in sessionStorage
+  useEffect(() => {
+    if (id) {
+      sessionStorage.setItem('lastChatId', id);
+    }
+  }, [id]);
+
+  // Track last selected file in sessionStorage
+  useEffect(() => {
+    if (selectedFile) {
+      sessionStorage.setItem('lastFileSelected', selectedFile);
+    }
+  }, [selectedFile]);
+
+  const lastChatId = typeof window !== 'undefined' ? sessionStorage.getItem('lastChatId') : null;
+  const lastFileSelected = typeof window !== 'undefined' ? sessionStorage.getItem('lastFileSelected') : null;
 
   const chat = useChat({
     id: id,
@@ -65,6 +107,11 @@ export default function ChatLayout() {
   chatRef.current = chat;
 
   const prevIdRef = useRef(id);
+
+  // Trigger fade-in on mount
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Cleanup and transition when switching chats
   useEffect(() => {
@@ -99,11 +146,79 @@ export default function ChatLayout() {
     }
   }, [id]);
 
+  // File handlers
+  const handleFileSelect = (path: string) => {
+    setSelectedFile(path);
+  };
+
+  const handleCreateFile = () => {
+    setNewFileName('');
+    setShowNewFileDialog(true);
+  };
+
+  const confirmCreateFile = async () => {
+    if (!newFileName.trim()) return;
+
+    try {
+      await fetch('/api/memories/file', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: newFileName, content: '' }),
+      });
+
+      // Reload tree
+      const response = await fetch('/api/memories/tree');
+      const data = await response.json();
+      setTree(data.tree || []);
+      setSelectedFile(newFileName);
+    } catch (error) {
+      console.error('Error creating file:', error);
+    } finally {
+      setShowNewFileDialog(false);
+      setNewFileName('');
+    }
+  };
+
+  const handleDeleteFile = (path: string) => {
+    setFileToDelete(path);
+  };
+
+  const confirmDeleteFile = async () => {
+    if (!fileToDelete) return;
+
+    try {
+      await fetch('/api/memories/file', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: fileToDelete }),
+      });
+
+      // Reload tree
+      const response = await fetch('/api/memories/tree');
+      const data = await response.json();
+      setTree(data.tree || []);
+
+      // Clear selected file if it was deleted
+      if (selectedFile === fileToDelete) {
+        setSelectedFile(null);
+      }
+    } catch (error) {
+      console.error('Error deleting file:', error);
+    } finally {
+      setFileToDelete(null);
+    }
+  };
+
   const outletContext: ChatLayoutContext = {
     chats,
     updateChats: setChats,
     chatHook: chat,
     revalidator,
+    tree,
+    setTree,
+    selectedFile,
+    setSelectedFile,
+    lastFileSelected,
   };
 
 
@@ -113,16 +228,30 @@ export default function ChatLayout() {
 
       <SidebarProvider>
         <div className="flex h-dvh w-full">
-          <ThreadListSidebar
+          <UnifiedSidebar
             chatHook={chat}
             chats={chats}
             updateChats={setChats}
             revalidator={revalidator}
+            tree={tree}
+            selectedFile={selectedFile}
+            onFileSelect={handleFileSelect}
+            onCreateFile={handleCreateFile}
+            onDeleteFile={handleDeleteFile}
+            fileToDelete={fileToDelete}
+            onCancelDelete={() => setFileToDelete(null)}
+            onConfirmDelete={confirmDeleteFile}
+            showNewFileDialog={showNewFileDialog}
+            newFileName={newFileName}
+            onNewFileNameChange={setNewFileName}
+            onCancelNewFile={() => setShowNewFileDialog(false)}
+            onConfirmNewFile={confirmCreateFile}
+            lastChatId={lastChatId}
           />
 
           {/* Add sidebar trigger, location can be customized */}
 
-          <div className="flex-1">
+          <div className={`flex-1 transition-opacity duration-200 ${mounted && navigation.state !== "loading" ? 'opacity-100' : 'opacity-0'}`}>
             {isTransitioning ? (
               <div className="flex h-full items-center justify-center">
                 <div className="text-muted-foreground">Switching chats...</div>

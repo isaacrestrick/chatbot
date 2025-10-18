@@ -10,7 +10,7 @@ import {
   useParams,
   type NavigateFunction,
 } from "react-router";
-import { ArchiveIcon, PlusIcon } from "lucide-react";
+import { Trash2, PlusIcon } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { TooltipIconButton } from "~/components/assistant-ui/tooltip-icon-button";
 
@@ -200,12 +200,12 @@ const ThreadListRow: FC<ThreadListRowProps> = ({
       </button>
 
       <TooltipIconButton
-        className="aui-thread-list-item-archive mr-3 ml-auto size-4 p-0 text-foreground hover:text-primary"
+        className="aui-thread-list-item-archive mr-3 ml-auto size-4 p-0 text-foreground hover:text-destructive"
         variant="ghost"
-        tooltip="Delete (not archive) thread"
+        tooltip="Delete thread"
         onClick={handleDelete}
       >
-        <ArchiveIcon />
+        <Trash2 />
       </TooltipIconButton>
     </div>
   );
