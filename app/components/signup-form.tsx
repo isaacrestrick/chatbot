@@ -11,6 +11,16 @@ import { Input } from "~/components/ui/input"
 import { Label } from "~/components/ui/label"
 import { Form, useNavigate } from "react-router"
 import { authClient } from "~/lib/auth-client"
+import { useState } from "react"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "~/components/ui/alert-dialog"
 
 
 
@@ -19,6 +29,7 @@ export function SignupForm({
   ...props
 }: React.ComponentProps<"div">) {
   const navigate = useNavigate()
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const signUp = async (e) => {
     e.preventDefault();
@@ -42,7 +53,7 @@ export function SignupForm({
           navigate("/")
         },
         onError: (ctx) => {
-          alert(ctx.error)
+          setErrorMessage(ctx.error.message || "An error occurred during sign up")
         },
       },
     )
@@ -109,6 +120,22 @@ export function SignupForm({
           </form>
         </CardContent>
       </Card>
+
+      <AlertDialog open={!!errorMessage} onOpenChange={(open) => !open && setErrorMessage(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Sign Up Error</AlertDialogTitle>
+            <AlertDialogDescription>
+              {errorMessage}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setErrorMessage(null)}>
+              OK
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
