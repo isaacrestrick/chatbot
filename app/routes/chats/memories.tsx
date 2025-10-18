@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useLoaderData } from 'react-router';
+import { useLoaderData, useNavigation } from 'react-router';
 import type { LoaderFunctionArgs, Route } from 'react-router';
 import { redirect } from 'react-router';
 import { SidebarProvider } from '~/components/ui/sidebar';
@@ -33,6 +33,7 @@ interface FileNode {
 
 export default function Memories() {
   const { userId } = useLoaderData<typeof loader>();
+  const navigation = useNavigation();
   const [tree, setTree] = useState<FileNode[]>([]);
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const [fileContent, setFileContent] = useState<string>('');
@@ -131,7 +132,7 @@ export default function Memories() {
           onFileSelect={setSelectedFile}
           onCreateFile={handleCreateFile}
         />
-        <main className="flex-1">
+        <main className={`flex-1 transition-opacity duration-200 ${navigation.state === "loading" ? 'opacity-0' : 'opacity-100'}`}>
           <PlateEditor filePath={selectedFile} content={fileContent} onSave={handleSave} />
         </main>
       </div>

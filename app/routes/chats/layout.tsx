@@ -1,4 +1,4 @@
-import { Outlet, useRevalidator, useRouteLoaderData, useLoaderData, type LoaderFunctionArgs, redirect } from "react-router";
+import { Outlet, useRevalidator, useRouteLoaderData, useLoaderData, useNavigation, type LoaderFunctionArgs, redirect } from "react-router";
 import { ThreadListSidebar } from "~/components/assistant-ui/threadlist-sidebar";
 import { SidebarProvider } from "~/components/ui/sidebar";
 
@@ -47,6 +47,7 @@ export default function ChatLayout() {
   const chatListsObj = useLoaderData()
   const chatContentObj = useRouteLoaderData("chat")
   const revalidator = useRevalidator()
+  const navigation = useNavigation()
 
   const [chats, setChats] = useState(chatListsObj.chats)
   const [isTransitioning, setIsTransitioning] = useState(false)
@@ -122,7 +123,7 @@ export default function ChatLayout() {
 
           {/* Add sidebar trigger, location can be customized */}
 
-          <div className="flex-1">
+          <div className={`flex-1 transition-opacity duration-200 ${navigation.state === "loading" ? 'opacity-0' : 'opacity-100'}`}>
             {isTransitioning ? (
               <div className="flex h-full items-center justify-center">
                 <div className="text-muted-foreground">Switching chats...</div>
