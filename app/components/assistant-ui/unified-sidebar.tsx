@@ -64,6 +64,7 @@ type UnifiedSidebarProps = React.ComponentProps<typeof Sidebar> & {
   onNewFileNameChange?: (name: string) => void;
   onCancelNewFile?: () => void;
   onConfirmNewFile?: () => void;
+  lastChatId?: string | null;
 };
 
 function FileTreeNode({ node, onFileSelect, selectedFile, onDeleteFile }: {
@@ -153,6 +154,7 @@ export function UnifiedSidebar({
   onNewFileNameChange,
   onCancelNewFile,
   onConfirmNewFile,
+  lastChatId,
   ...sidebarProps
 }: UnifiedSidebarProps) {
   const location = useLocation()
@@ -169,7 +171,7 @@ export function UnifiedSidebar({
     <Sidebar {...sidebarProps}>
       <SidebarHeader className="aui-sidebar-header border-b px-3 py-3">
         <div className="flex gap-2">
-          <Link to="/" className="flex-1">
+          <Link to={lastChatId ? `/chat/${lastChatId}` : '/'} className="flex-1">
             <button className={`flex w-full items-center justify-center gap-1.5 rounded-md px-2 py-2 text-sm font-medium transition-all ${!isMemoriesView ? 'bg-sidebar-accent hover:bg-sidebar-accent/90' : 'hover:bg-muted'}`}>
               <MessagesSquare className="size-4 shrink-0" />
               <span className="truncate">Chats</span>
