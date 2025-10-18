@@ -26,7 +26,6 @@ export type ChatLayoutContext = {
   setTree?: Dispatch<SetStateAction<FileNode[]>>;
   selectedFile?: string | null;
   setSelectedFile?: Dispatch<SetStateAction<string | null>>;
-  lastChatId?: string | null;
 };
 
 export async function loader({ request }: LoaderFunctionArgs) {
@@ -75,6 +74,15 @@ export default function ChatLayout() {
   const [newFileName, setNewFileName] = useState('')
 
   const isMemoriesView = location.pathname === '/memories'
+
+  // Track last chat ID in localStorage
+  useEffect(() => {
+    if (id) {
+      localStorage.setItem('lastChatId', id);
+    }
+  }, [id]);
+
+  const lastChatId = typeof window !== 'undefined' ? localStorage.getItem('lastChatId') : null;
 
   const chat = useChat({
     id: id,
@@ -201,7 +209,6 @@ export default function ChatLayout() {
     setTree,
     selectedFile,
     setSelectedFile,
-    lastChatId: id,
   };
 
 
@@ -229,7 +236,7 @@ export default function ChatLayout() {
             onNewFileNameChange={setNewFileName}
             onCancelNewFile={() => setShowNewFileDialog(false)}
             onConfirmNewFile={confirmCreateFile}
-            lastChatId={id}
+            lastChatId={lastChatId}
           />
 
           {/* Add sidebar trigger, location can be customized */}
