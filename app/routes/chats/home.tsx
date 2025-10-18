@@ -5,7 +5,7 @@ import ChatButton from '../../ui_components/ChatButton'
 import type { ChatLayoutContext } from "./layout";
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "Home | Researcher" },
+    { title: "Researcher" },
     { name: "description", content: "AI Research Assistant" },
   ];
 }

@@ -8,7 +8,7 @@ import { PlateEditor } from '~/components/assistant-ui/plate-editor';
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "Memories | Researcher" },
+    { title: "Researcher" },
     { name: "description", content: "AI Memory Management" },
   ];
 }
