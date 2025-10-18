@@ -70,6 +70,8 @@ export default function ChatLayout() {
   const [tree, setTree] = useState<FileNode[]>([])
   const [selectedFile, setSelectedFile] = useState<string | null>(null)
   const [fileToDelete, setFileToDelete] = useState<string | null>(null)
+  const [showNewFileDialog, setShowNewFileDialog] = useState(false)
+  const [newFileName, setNewFileName] = useState('')
 
   const isMemoriesView = location.pathname === '/memories'
 
@@ -131,24 +133,31 @@ export default function ChatLayout() {
     setSelectedFile(path);
   };
 
-  const handleCreateFile = async () => {
-    const fileName = prompt('Enter file name:');
-    if (!fileName) return;
+  const handleCreateFile = () => {
+    setNewFileName('');
+    setShowNewFileDialog(true);
+  };
+
+  const confirmCreateFile = async () => {
+    if (!newFileName.trim()) return;
 
     try {
       await fetch('/api/memories/file', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ path: fileName, content: '' }),
+        body: JSON.stringify({ path: newFileName, content: '' }),
       });
 
       // Reload tree
       const response = await fetch('/api/memories/tree');
       const data = await response.json();
       setTree(data.tree || []);
-      setSelectedFile(fileName);
+      setSelectedFile(newFileName);
     } catch (error) {
       console.error('Error creating file:', error);
+    } finally {
+      setShowNewFileDialog(false);
+      setNewFileName('');
     }
   };
 
@@ -213,6 +222,11 @@ export default function ChatLayout() {
             fileToDelete={fileToDelete}
             onCancelDelete={() => setFileToDelete(null)}
             onConfirmDelete={confirmDeleteFile}
+            showNewFileDialog={showNewFileDialog}
+            newFileName={newFileName}
+            onNewFileNameChange={setNewFileName}
+            onCancelNewFile={() => setShowNewFileDialog(false)}
+            onConfirmNewFile={confirmCreateFile}
           />
 
           {/* Add sidebar trigger, location can be customized */}

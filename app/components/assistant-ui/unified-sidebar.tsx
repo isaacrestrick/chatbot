@@ -18,6 +18,7 @@ import {
   SidebarMenuSubButton,
 } from "~/components/ui/sidebar";
 import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "~/components/ui/collapsible";
 import { TooltipIconButton } from "~/components/assistant-ui/tooltip-icon-button";
 import { ThreadList } from "~/components/assistant-ui/thread-list";
@@ -58,6 +59,11 @@ type UnifiedSidebarProps = React.ComponentProps<typeof Sidebar> & {
   fileToDelete?: string | null;
   onCancelDelete?: () => void;
   onConfirmDelete?: () => void;
+  showNewFileDialog?: boolean;
+  newFileName?: string;
+  onNewFileNameChange?: (name: string) => void;
+  onCancelNewFile?: () => void;
+  onConfirmNewFile?: () => void;
 };
 
 function FileTreeNode({ node, onFileSelect, selectedFile, onDeleteFile }: {
@@ -142,6 +148,11 @@ export function UnifiedSidebar({
   fileToDelete,
   onCancelDelete,
   onConfirmDelete,
+  showNewFileDialog,
+  newFileName,
+  onNewFileNameChange,
+  onCancelNewFile,
+  onConfirmNewFile,
   ...sidebarProps
 }: UnifiedSidebarProps) {
   const location = useLocation()
@@ -238,6 +249,34 @@ export function UnifiedSidebar({
       )}
 
     </Sidebar>
+
+    <AlertDialog open={showNewFileDialog} onOpenChange={(open) => !open && onCancelNewFile?.()}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Create New File</AlertDialogTitle>
+          <AlertDialogDescription>
+            Enter a name for your new file.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <Input
+          value={newFileName}
+          onChange={(e) => onNewFileNameChange?.(e.target.value)}
+          placeholder="filename.md"
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              onConfirmNewFile?.();
+            }
+          }}
+          autoFocus
+        />
+        <AlertDialogFooter>
+          <AlertDialogCancel onClick={onCancelNewFile}>Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={onConfirmNewFile}>
+            Create
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
 
     <AlertDialog open={!!fileToDelete} onOpenChange={(open) => !open && onCancelDelete?.()}>
       <AlertDialogContent>
