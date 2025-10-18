@@ -1,5 +1,5 @@
-import { Outlet, useRevalidator, useRouteLoaderData, useLoaderData, useNavigation, type LoaderFunctionArgs, redirect } from "react-router";
-import { ThreadListSidebar } from "~/components/assistant-ui/threadlist-sidebar";
+import { Outlet, useRevalidator, useRouteLoaderData, useLoaderData, useNavigation, useLocation, type LoaderFunctionArgs, redirect } from "react-router";
+import { UnifiedSidebar } from "~/components/assistant-ui/unified-sidebar";
 import { SidebarProvider } from "~/components/ui/sidebar";
 
 import { useChat, type UseChatHelpers } from '@ai-sdk/react';
@@ -9,11 +9,23 @@ import { useState, useEffect, useRef, type Dispatch, type SetStateAction } from 
 
 import type { ThreadSummary } from "~/components/assistant-ui/thread-list";
 
+interface FileNode {
+  name: string;
+  path: string;
+  type: 'file' | 'folder';
+  children?: FileNode[];
+}
+
 export type ChatLayoutContext = {
   chats: ThreadSummary[];
   updateChats: Dispatch<SetStateAction<ThreadSummary[]>>;
   chatHook: UseChatHelpers<any>;
   revalidator: ReturnType<typeof useRevalidator>;
+  // Memory-specific context
+  tree?: FileNode[];
+  setTree?: Dispatch<SetStateAction<FileNode[]>>;
+  selectedFile?: string | null;
+  setSelectedFile?: Dispatch<SetStateAction<string | null>>;
 };
 
 export async function loader({ request }: LoaderFunctionArgs) {
@@ -44,6 +56,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 export default function ChatLayout() {
   const {id} = useParams()
+  const location = useLocation()
   const chatListsObj = useLoaderData()
   const chatContentObj = useRouteLoaderData("chat")
   const revalidator = useRevalidator()
@@ -52,6 +65,12 @@ export default function ChatLayout() {
   const [chats, setChats] = useState(chatListsObj.chats)
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [mounted, setMounted] = useState(false)
+
+  // Memory state
+  const [tree, setTree] = useState<FileNode[]>([])
+  const [selectedFile, setSelectedFile] = useState<string | null>(null)
+
+  const isMemoriesView = location.pathname === '/memories'
 
   const chat = useChat({
     id: id,
@@ -106,11 +125,41 @@ export default function ChatLayout() {
     }
   }, [id]);
 
+  // File handlers
+  const handleFileSelect = (path: string) => {
+    setSelectedFile(path);
+  };
+
+  const handleCreateFile = async () => {
+    const fileName = prompt('Enter file name:');
+    if (!fileName) return;
+
+    try {
+      await fetch('/api/memories/file', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: fileName, content: '' }),
+      });
+
+      // Reload tree
+      const response = await fetch('/api/memories/tree');
+      const data = await response.json();
+      setTree(data.tree || []);
+      setSelectedFile(fileName);
+    } catch (error) {
+      console.error('Error creating file:', error);
+    }
+  };
+
   const outletContext: ChatLayoutContext = {
     chats,
     updateChats: setChats,
     chatHook: chat,
     revalidator,
+    tree,
+    setTree,
+    selectedFile,
+    setSelectedFile,
   };
 
 
@@ -120,11 +169,15 @@ export default function ChatLayout() {
 
       <SidebarProvider>
         <div className="flex h-dvh w-full">
-          <ThreadListSidebar
+          <UnifiedSidebar
             chatHook={chat}
             chats={chats}
             updateChats={setChats}
             revalidator={revalidator}
+            tree={tree}
+            selectedFile={selectedFile}
+            onFileSelect={handleFileSelect}
+            onCreateFile={handleCreateFile}
           />
 
           {/* Add sidebar trigger, location can be customized */}

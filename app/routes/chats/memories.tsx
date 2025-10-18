@@ -1,10 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useLoaderData, useNavigation } from 'react-router';
+import { useLoaderData, useNavigation, useOutletContext } from 'react-router';
 import type { LoaderFunctionArgs, Route } from 'react-router';
 import { redirect } from 'react-router';
-import { SidebarProvider } from '~/components/ui/sidebar';
-import { FileTreeSidebar } from '~/components/assistant-ui/file-tree-sidebar';
 import { PlateEditor } from '~/components/assistant-ui/plate-editor';
+import type { ChatLayoutContext } from "./layout";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -24,26 +23,11 @@ export async function loader({ request }: LoaderFunctionArgs) {
   return { userId: session.user.id };
 }
 
-interface FileNode {
-  name: string;
-  path: string;
-  type: 'file' | 'folder';
-  children?: FileNode[];
-}
-
 export default function Memories() {
   const { userId } = useLoaderData<typeof loader>();
-  const navigation = useNavigation();
-  const [tree, setTree] = useState<FileNode[]>([]);
-  const [selectedFile, setSelectedFile] = useState<string | null>(null);
+  const { tree, setTree, selectedFile } = useOutletContext<ChatLayoutContext>();
   const [fileContent, setFileContent] = useState<string>('');
   const [loading, setLoading] = useState(true);
-  const [mounted, setMounted] = useState(false);
-
-  // Trigger fade-in on mount
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   // Load file tree
   useEffect(() => {
@@ -51,7 +35,7 @@ export default function Memories() {
       try {
         const response = await fetch('/api/memories/tree');
         const data = await response.json();
-        setTree(data.tree || []);
+        setTree?.(data.tree || []);
       } catch (error) {
         console.error('Error loading file tree:', error);
       } finally {
@@ -59,7 +43,7 @@ export default function Memories() {
       }
     }
     loadTree();
-  }, []);
+  }, [setTree]);
 
   // Load file content when file is selected
   useEffect(() => {
@@ -99,27 +83,6 @@ export default function Memories() {
     [selectedFile]
   );
 
-  // Create new file
-  const handleCreateFile = useCallback(async () => {
-    const fileName = prompt('Enter file name:');
-    if (!fileName) return;
-
-    try {
-      await fetch('/api/memories/file', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ path: fileName, content: '' }),
-      });
-
-      // Reload tree
-      const response = await fetch('/api/memories/tree');
-      const data = await response.json();
-      setTree(data.tree || []);
-      setSelectedFile(fileName);
-    } catch (error) {
-      console.error('Error creating file:', error);
-    }
-  }, []);
 
   if (loading) {
     return (
@@ -130,18 +93,8 @@ export default function Memories() {
   }
 
   return (
-    <SidebarProvider>
-      <div className="flex h-screen w-full">
-        <FileTreeSidebar
-          tree={tree}
-          selectedFile={selectedFile}
-          onFileSelect={setSelectedFile}
-          onCreateFile={handleCreateFile}
-        />
-        <main className={`flex-1 transition-opacity duration-200 ${mounted && navigation.state !== "loading" ? 'opacity-100' : 'opacity-0'}`}>
-          <PlateEditor filePath={selectedFile} content={fileContent} onSave={handleSave} />
-        </main>
-      </div>
-    </SidebarProvider>
+    <div className="h-full">
+      <PlateEditor filePath={selectedFile} content={fileContent} onSave={handleSave} />
+    </div>
   );
 }
