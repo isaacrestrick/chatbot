@@ -38,6 +38,12 @@ export default function Memories() {
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const [fileContent, setFileContent] = useState<string>('');
   const [loading, setLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
+
+  // Trigger fade-in on mount
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Load file tree
   useEffect(() => {
@@ -132,7 +138,7 @@ export default function Memories() {
           onFileSelect={setSelectedFile}
           onCreateFile={handleCreateFile}
         />
-        <main className={`flex-1 transition-opacity duration-200 ${navigation.state === "loading" ? 'opacity-0' : 'opacity-100'}`}>
+        <main className={`flex-1 transition-opacity duration-200 ${mounted && navigation.state !== "loading" ? 'opacity-100' : 'opacity-0'}`}>
           <PlateEditor filePath={selectedFile} content={fileContent} onSave={handleSave} />
         </main>
       </div>

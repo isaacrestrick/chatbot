@@ -51,6 +51,7 @@ export default function ChatLayout() {
 
   const [chats, setChats] = useState(chatListsObj.chats)
   const [isTransitioning, setIsTransitioning] = useState(false)
+  const [mounted, setMounted] = useState(false)
 
   const chat = useChat({
     id: id,
@@ -66,6 +67,11 @@ export default function ChatLayout() {
   chatRef.current = chat;
 
   const prevIdRef = useRef(id);
+
+  // Trigger fade-in on mount
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Cleanup and transition when switching chats
   useEffect(() => {
@@ -123,7 +129,7 @@ export default function ChatLayout() {
 
           {/* Add sidebar trigger, location can be customized */}
 
-          <div className={`flex-1 transition-opacity duration-200 ${navigation.state === "loading" ? 'opacity-0' : 'opacity-100'}`}>
+          <div className={`flex-1 transition-opacity duration-200 ${mounted && navigation.state !== "loading" ? 'opacity-100' : 'opacity-0'}`}>
             {isTransitioning ? (
               <div className="flex h-full items-center justify-center">
                 <div className="text-muted-foreground">Switching chats...</div>
