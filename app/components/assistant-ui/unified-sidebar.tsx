@@ -21,7 +21,17 @@ import { Button } from "~/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "~/components/ui/collapsible";
 import { TooltipIconButton } from "~/components/assistant-ui/tooltip-icon-button";
 import { ThreadList } from "~/components/assistant-ui/thread-list";
-import BackButton from '../../ui_components/BackButton'
+import BackButton from '../../ui_components/BackButton';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "~/components/ui/alert-dialog";
 
 import type { ThreadSummary } from "./thread-list";
 import type { Dispatch, SetStateAction } from "react";
@@ -45,6 +55,9 @@ type UnifiedSidebarProps = React.ComponentProps<typeof Sidebar> & {
   onFileSelect?: (path: string) => void;
   onCreateFile?: () => void;
   onDeleteFile?: (path: string) => void;
+  fileToDelete?: string | null;
+  onCancelDelete?: () => void;
+  onConfirmDelete?: () => void;
 };
 
 function FileTreeNode({ node, onFileSelect, selectedFile, onDeleteFile }: {
@@ -126,6 +139,9 @@ export function UnifiedSidebar({
   onFileSelect,
   onCreateFile,
   onDeleteFile,
+  fileToDelete,
+  onCancelDelete,
+  onConfirmDelete,
   ...sidebarProps
 }: UnifiedSidebarProps) {
   const location = useLocation()
@@ -138,6 +154,7 @@ export function UnifiedSidebar({
     </div>
 
   return (
+    <>
     <Sidebar {...sidebarProps}>
       <SidebarHeader className="aui-sidebar-header border-b px-3 py-3">
         <div className="flex gap-2">
@@ -219,6 +236,25 @@ export function UnifiedSidebar({
           </SidebarMenu>
         </SidebarFooter>
       )}
+
     </Sidebar>
+
+    <AlertDialog open={!!fileToDelete} onOpenChange={(open) => !open && onCancelDelete?.()}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Delete File</AlertDialogTitle>
+          <AlertDialogDescription>
+            Are you sure you want to delete "{fileToDelete}"? This action cannot be undone.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel onClick={onCancelDelete}>Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={onConfirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            Delete
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </>
   );
 }

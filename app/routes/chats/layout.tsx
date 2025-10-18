@@ -69,6 +69,7 @@ export default function ChatLayout() {
   // Memory state
   const [tree, setTree] = useState<FileNode[]>([])
   const [selectedFile, setSelectedFile] = useState<string | null>(null)
+  const [fileToDelete, setFileToDelete] = useState<string | null>(null)
 
   const isMemoriesView = location.pathname === '/memories'
 
@@ -151,14 +152,18 @@ export default function ChatLayout() {
     }
   };
 
-  const handleDeleteFile = async (path: string) => {
-    if (!confirm(`Delete ${path}?`)) return;
+  const handleDeleteFile = (path: string) => {
+    setFileToDelete(path);
+  };
+
+  const confirmDeleteFile = async () => {
+    if (!fileToDelete) return;
 
     try {
       await fetch('/api/memories/file', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ path }),
+        body: JSON.stringify({ path: fileToDelete }),
       });
 
       // Reload tree
@@ -167,11 +172,13 @@ export default function ChatLayout() {
       setTree(data.tree || []);
 
       // Clear selected file if it was deleted
-      if (selectedFile === path) {
+      if (selectedFile === fileToDelete) {
         setSelectedFile(null);
       }
     } catch (error) {
       console.error('Error deleting file:', error);
+    } finally {
+      setFileToDelete(null);
     }
   };
 
@@ -203,6 +210,9 @@ export default function ChatLayout() {
             onFileSelect={handleFileSelect}
             onCreateFile={handleCreateFile}
             onDeleteFile={handleDeleteFile}
+            fileToDelete={fileToDelete}
+            onCancelDelete={() => setFileToDelete(null)}
+            onConfirmDelete={confirmDeleteFile}
           />
 
           {/* Add sidebar trigger, location can be customized */}

@@ -164,8 +164,6 @@ const ThreadListRow: FC<ThreadListRowProps> = ({
   };
 
   const handleDelete = async () => {
-    if (!confirm(`Delete chat "${chat.title}"?`)) return;
-
     if (isActive) {
       await stopActiveStream(chatHook);
     }
