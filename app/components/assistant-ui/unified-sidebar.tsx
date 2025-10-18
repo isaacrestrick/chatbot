@@ -1,6 +1,6 @@
 import * as React from "react";
 import { useState, useEffect } from "react";
-import { MessagesSquare, FolderIcon, PlusIcon, ChevronRightIcon, FileIcon } from "lucide-react";
+import { MessagesSquare, FolderIcon, PlusIcon, ChevronRightIcon, FileIcon, Trash2 } from "lucide-react";
 import { Link, useLocation } from "react-router";
 import {
   Sidebar,
@@ -43,12 +43,14 @@ type UnifiedSidebarProps = React.ComponentProps<typeof Sidebar> & {
   selectedFile?: string | null;
   onFileSelect?: (path: string) => void;
   onCreateFile?: () => void;
+  onDeleteFile?: (path: string) => void;
 };
 
-function FileTreeNode({ node, onFileSelect, selectedFile }: {
+function FileTreeNode({ node, onFileSelect, selectedFile, onDeleteFile }: {
   node: FileNode;
   onFileSelect?: (path: string) => void;
   selectedFile?: string | null;
+  onDeleteFile?: (path: string) => void;
 }) {
   const [isOpen, setIsOpen] = useState(true);
 
@@ -74,6 +76,7 @@ function FileTreeNode({ node, onFileSelect, selectedFile }: {
                       node={child}
                       onFileSelect={onFileSelect}
                       selectedFile={selectedFile}
+                      onDeleteFile={onDeleteFile}
                     />
                   </SidebarMenuSubItem>
                 ))}
@@ -87,14 +90,27 @@ function FileTreeNode({ node, onFileSelect, selectedFile }: {
 
   return (
     <SidebarMenuItem>
-      <SidebarMenuButton
-        onClick={() => onFileSelect?.(node.path)}
-        isActive={selectedFile === node.path}
-        className="w-full"
-      >
-        <FileIcon className="h-4 w-4" />
-        <span>{node.name}</span>
-      </SidebarMenuButton>
+      <div className="flex items-center gap-2 w-full">
+        <SidebarMenuButton
+          onClick={() => onFileSelect?.(node.path)}
+          isActive={selectedFile === node.path}
+          className="flex-1"
+        >
+          <FileIcon className="h-4 w-4" />
+          <span>{node.name}</span>
+        </SidebarMenuButton>
+        <button
+          type="button"
+          className="size-4 p-0 text-foreground hover:text-destructive transition-colors"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDeleteFile?.(node.path);
+          }}
+          aria-label="Delete file"
+        >
+          <Trash2 className="h-4 w-4" />
+        </button>
+      </div>
     </SidebarMenuItem>
   );
 }
@@ -108,6 +124,7 @@ export function UnifiedSidebar({
   selectedFile,
   onFileSelect,
   onCreateFile,
+  onDeleteFile,
   ...sidebarProps
 }: UnifiedSidebarProps) {
   const location = useLocation()
@@ -165,6 +182,7 @@ export function UnifiedSidebar({
                           node={node}
                           onFileSelect={onFileSelect}
                           selectedFile={selectedFile}
+                          onDeleteFile={onDeleteFile}
                         />
                       ))}
                     </SidebarMenu>

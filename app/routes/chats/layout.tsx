@@ -151,6 +151,30 @@ export default function ChatLayout() {
     }
   };
 
+  const handleDeleteFile = async (path: string) => {
+    if (!confirm(`Delete ${path}?`)) return;
+
+    try {
+      await fetch('/api/memories/file', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path }),
+      });
+
+      // Reload tree
+      const response = await fetch('/api/memories/tree');
+      const data = await response.json();
+      setTree(data.tree || []);
+
+      // Clear selected file if it was deleted
+      if (selectedFile === path) {
+        setSelectedFile(null);
+      }
+    } catch (error) {
+      console.error('Error deleting file:', error);
+    }
+  };
+
   const outletContext: ChatLayoutContext = {
     chats,
     updateChats: setChats,
@@ -178,6 +202,7 @@ export default function ChatLayout() {
             selectedFile={selectedFile}
             onFileSelect={handleFileSelect}
             onCreateFile={handleCreateFile}
+            onDeleteFile={handleDeleteFile}
           />
 
           {/* Add sidebar trigger, location can be customized */}
