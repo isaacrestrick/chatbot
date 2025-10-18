@@ -5,8 +5,8 @@ import ChatButton from '../../ui_components/ChatButton'
 import type { ChatLayoutContext } from "./layout";
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "User Home. Will probably list out chats and include a new chat button later" },
-    { name: "description", content: "Welcome to chatbot!" },
+    { title: "Home | Researcher" },
+    { name: "description", content: "AI Research Assistant" },
   ];
 }
 

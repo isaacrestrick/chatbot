@@ -17,7 +17,7 @@ import {
 } from '~/components/ui/sidebar';
 import { Button } from '~/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '~/components/ui/collapsible';
-import { ChevronRightIcon, FileIcon, FolderIcon, PlusIcon, MessagesSquare, ArrowLeft } from 'lucide-react';
+import { ChevronRightIcon, FileIcon, FolderIcon, PlusIcon, MessagesSquare } from 'lucide-react';
 
 interface FileNode {
   name: string;
@@ -95,25 +95,20 @@ export function FileTreeSidebar({
 }: FileTreeSidebarProps) {
   return (
     <Sidebar>
-      <SidebarHeader className="aui-sidebar-header mb-2 border-b">
-        <div className="aui-sidebar-header-content flex items-center justify-between">
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton size="lg" asChild>
-                <Link to="/">
-                  <ArrowLeft className="size-4" />
-                  <div className="aui-sidebar-header-icon-wrapper flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                    <MessagesSquare className="aui-sidebar-header-icon size-4" />
-                  </div>
-                  <div className="aui-sidebar-header-heading mr-6 flex flex-col gap-0.5 leading-none">
-                    <span className="aui-sidebar-header-title font-semibold">
-                      Go To Researcher
-                    </span>
-                  </div>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
+      <SidebarHeader className="aui-sidebar-header border-b px-3 py-3">
+        <div className="flex gap-2">
+          <Link to="/" className="flex-1">
+            <button className="flex w-full items-center justify-center gap-1.5 rounded-md px-2 py-2 text-sm font-medium transition-all hover:bg-muted">
+              <MessagesSquare className="size-4 shrink-0" />
+              <span className="truncate">Chats</span>
+            </button>
+          </Link>
+          <Link to="/memories" className="flex-1">
+            <button className="flex w-full items-center justify-center gap-1.5 rounded-md bg-sidebar-accent px-2 py-2 text-sm font-medium transition-all hover:bg-sidebar-accent/90">
+              <FolderIcon className="size-4 shrink-0" />
+              <span className="truncate">Memories</span>
+            </button>
+          </Link>
         </div>
       </SidebarHeader>
       <SidebarContent className="aui-sidebar-content px-2">

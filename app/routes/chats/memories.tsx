@@ -1,10 +1,17 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useLoaderData } from 'react-router';
-import type { LoaderFunctionArgs } from 'react-router';
+import type { LoaderFunctionArgs, Route } from 'react-router';
 import { redirect } from 'react-router';
 import { SidebarProvider } from '~/components/ui/sidebar';
 import { FileTreeSidebar } from '~/components/assistant-ui/file-tree-sidebar';
 import { PlateEditor } from '~/components/assistant-ui/plate-editor';
+
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Memories | Researcher" },
+    { name: "description", content: "AI Memory Management" },
+  ];
+}
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const { auth } = await import("../../lib/auth.server");
