@@ -19,6 +19,7 @@ import {
 } from "~/components/ui/sidebar";
 import { Button } from "~/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "~/components/ui/collapsible";
+import { TooltipIconButton } from "~/components/assistant-ui/tooltip-icon-button";
 import { ThreadList } from "~/components/assistant-ui/thread-list";
 import BackButton from '../../ui_components/BackButton'
 
@@ -99,17 +100,17 @@ function FileTreeNode({ node, onFileSelect, selectedFile, onDeleteFile }: {
           <FileIcon className="h-4 w-4" />
           <span>{node.name}</span>
         </SidebarMenuButton>
-        <button
-          type="button"
-          className="size-4 p-0 text-foreground hover:text-destructive transition-colors"
+        <TooltipIconButton
+          className="size-4 p-0 text-foreground hover:text-destructive"
+          variant="ghost"
+          tooltip="Delete file"
           onClick={(e) => {
             e.stopPropagation();
             onDeleteFile?.(node.path);
           }}
-          aria-label="Delete file"
         >
           <Trash2 className="h-4 w-4" />
-        </button>
+        </TooltipIconButton>
       </div>
     </SidebarMenuItem>
   );

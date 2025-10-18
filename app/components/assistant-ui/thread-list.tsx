@@ -202,7 +202,7 @@ const ThreadListRow: FC<ThreadListRowProps> = ({
       </button>
 
       <TooltipIconButton
-        className="aui-thread-list-item-archive mr-3 ml-auto size-4 p-0 text-foreground hover:text-primary"
+        className="aui-thread-list-item-archive mr-3 ml-auto size-4 p-0 text-foreground hover:text-destructive"
         variant="ghost"
         tooltip="Delete thread"
         onClick={handleDelete}
