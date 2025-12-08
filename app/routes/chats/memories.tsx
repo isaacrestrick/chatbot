@@ -7,7 +7,7 @@ import type { ChatLayoutContext } from "./layout";
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "Researcher" },
+    { title: "Memory" },
     { name: "description", content: "AI Memory Management" },
   ];
 }

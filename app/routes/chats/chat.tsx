@@ -12,7 +12,7 @@ import { useEffect, useRef } from 'react';
 
 export function meta({}: Route.MetaArgs) {
     return [
-      { title: "Researcher" },
+      { title: "Memory" },
       { name: "description", content: "AI Research Chat" },
     ];
   }
