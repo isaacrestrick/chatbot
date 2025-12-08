@@ -76,7 +76,7 @@ export function SignupForm({
                   id="name"
                   type="name"
                   name="name"
-                  placeholder="Joseph Mama"
+                  placeholder="Your Name"
                 />
               </div>
               <div className="grid gap-3">
@@ -85,7 +85,7 @@ export function SignupForm({
                   id="email"
                   type="email"
                   name="email"
-                  placeholder="joseph@mama.com"
+                  placeholder="you@example.com"
                   required
                 />
               </div>
@@ -111,12 +111,6 @@ export function SignupForm({
                 
               </div>
             </div>
-            {<div className="mt-4 text-center text-sm">
-              Forgot your password? {" "}
-              <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ&list=RDdQw4w9WgXcQ&start_radio=1" className="underline underline-offset-4">
-              That's unfortunate!
-              </a>
-            </div>}
           </form>
         </CardContent>
       </Card>

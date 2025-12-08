@@ -29,7 +29,7 @@ export const links: Route.LinksFunction = () => [
 
 export function meta() {
   return [
-    { title: "Researcher" },
+    { title: "Memory" },
     { name: "description", content: "AI Research Assistant" },
   ];
 }
